@@ -202,6 +202,12 @@ header p.legend { font-size: 13.5px; padding: 10px 14px; border: 1px dashed var(
 .tree.filtering li.leaf:not(.hit) { opacity: .35; }
 .tree li.leaf.hit .leafchip { border-color: var(--leaf); }
 
+/* duas leituras + confronto */
+.roots { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.cmp { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+.cmp.ok { color: var(--leaf); }
+.cmp.diff { color: var(--warn); }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 </style>
 
@@ -342,6 +348,73 @@ const N = {
     { t: "Menor/maior X tal que \"dá pra fazer com X\"", s: "capacidade, velocidade, número de dias", go: "p:bsanswer" },
     { t: "Decidir passo a passo com a melhor escolha local", s: "pular, abastecer, particionar", go: "p:greedy" },
     { t: "Bits: elemento único, contar 1s, XOR, somar sem +", go: "p:bits" },
+  ]},
+
+  /* ---------- segunda leitura: pelo que a solução precisa fazer (mesmas folhas) ---------- */
+  nroot: { q: "Que trabalho a solução precisa fazer, que a força bruta repete ou faz às cegas?", opts: [
+    { t: "Lembrar o que já passou e consultar rápido", s: "\"já vi este valor?\", \"onde?\", \"quantas vezes?\"", go: "nmem" },
+    { t: "Descartar candidatos sem testá-los, com a garantia de não perder a resposta", s: "uma comparação elimina muitos candidatos de uma vez", go: "ndisc" },
+    { t: "Reaproveitar subproblemas que se repetem", s: "um ótimo ou uma contagem em que cada escolha afeta as próximas", go: "nsub" },
+    { t: "Gerar todas as soluções válidas", s: "a saída é a lista de todas as combinações, subconjuntos ou arranjos", go: "p:backtrack" },
+    { t: "Acompanhar o que ainda está aberto ou pendente", s: "aninhamento, quem ainda espera, quantos estão ativos agora", go: "nopen" },
+    { t: "Pegar repetidamente o menor ou o maior candidato", s: "top K, próximo mais barato, mediana", go: "nmax" },
+    { t: "Percorrer conexões entre itens", s: "vizinhos, dependências, pais e filhos", go: "nconn" },
+    { t: "Trabalhar no lugar, sem memória extra", s: "O(1) de espaço: a própria estrutura guarda a informação", go: "nplace" },
+    { t: "Atender muitas chamadas de uma mesma operação", s: "o enunciado define métodos que serão chamados muitas vezes", go: "design" },
+  ]},
+  nmem: { q: "O que você precisa lembrar sobre o que já passou?", opts: [
+    { t: "Se um valor apareceu, quantas vezes, ou quem é igual a quem", s: "existência, frequência, agrupar iguais", go: "p:hash" },
+    { t: "O valor que completaria o atual", s: "um alvo exato, e os índices originais importam", go: "p:complement" },
+    { t: "Um acumulado até cada posição, para medir trechos", s: "soma do trecho = prefixo atual − prefixo anterior, inclusive com negativos", go: "p:prefix" },
+    { t: "Prefixos de muitas palavras", s: "autocomplete, buscar por prefixo", go: "p:trie" },
+  ]},
+  ndisc: { q: "O que garante que o descarte é seguro?", opts: [
+    { t: "Uma ordem: cada comparação elimina uma fileira inteira de pares", s: "dois índices vindo das pontas; a ordem pode ser a dos valores ou a das próprias posições", go: "p:twoptr" },
+    { t: "A validade de um trecho contíguo é monotônica: crescer só piora", s: "se [l..r] é inválido, todo trecho maior que o contém também é", go: "p:window" },
+    { t: "Os dados estão ordenados: o meio diz de que lado está o alvo", s: "cada comparação corta metade do espaço de busca", go: "p:binsearch" },
+    { t: "A resposta tem viabilidade monotônica: não, não, sim, sim", s: "sei testar um X, mas não sei calculá-lo", go: "p:bsanswer" },
+    { t: "Um elemento superado por um mais novo nunca mais importa", s: "dominância: guardo só quem ainda pode ser a resposta", go: "ndom" },
+    { t: "A melhor escolha local nunca precisa ser desfeita", s: "argumento de troca; procure um contraexemplo antes de confiar", go: "ngreedy" },
+    { t: "Depois de ordenar, só vizinhos podem interagir", s: "ordenando por início, cada intervalo só pode se sobrepor ao anterior", go: "p:merge" },
+  ]},
+  ndom: { q: "O que você pergunta a cada passo?", opts: [
+    { t: "Para cada elemento, quem é o próximo maior ou menor (ou a distância até ele)", go: "p:monostack" },
+    { t: "Qual é o máximo ou o mínimo da janela atual de tamanho k", go: "p:deque" },
+  ]},
+  ngreedy: { q: "Qual é a escolha local?", opts: [
+    { t: "Entre intervalos, ficar com o que termina primeiro", s: "caber o maior número possível de intervalos compatíveis", go: "p:byend" },
+    { t: "Outra regra local, provada por um argumento de troca", s: "agendar, atribuir, distribuir", go: "p:greedy" },
+  ]},
+  nsub: { q: "Programação dinâmica: o que o estado precisa lembrar?", opts: [
+    { t: "O melhor trecho que termina na posição atual", s: "começar aqui ou prolongar o anterior", go: "p:kadane" },
+    { t: "Uma posição i numa sequência", s: "pegar ou pular, prefixo até i", go: "p:dp1" },
+    { t: "Uma posição em cada uma de duas sequências", go: "p:dp2" },
+    { t: "Quanto ainda resta de uma capacidade ou de um alvo", s: "soma, peso, orçamento", go: "p:knap" },
+    { t: "Uma célula de um grid percorrido só para a direita e para baixo", go: "p:dpgrid" },
+    { t: "Um trecho [i..j] cujo custo depende das bordas", s: "cortar, estourar, palíndromo", go: "p:dpint" },
+  ]},
+  nopen: { q: "O que está aberto, e o que importa sobre isso?", opts: [
+    { t: "O último aberto é o primeiro a fechar", s: "parênteses, expressões, aninhamento", go: "p:stack" },
+    { t: "Quantos estão ativos ao mesmo tempo", s: "salas, lotação: os fins dos ativos num heap", go: "p:rooms" },
+  ]},
+  nmax: { q: "De onde vêm os candidatos?", opts: [
+    { t: "De uma coleção ou de K listas: os K melhores, o K-ésimo, ou fundir em ordem", go: "p:heap" },
+    { t: "De um fluxo, e quero a mediana a cada passo", go: "p:twoheaps" },
+    { t: "De um grafo com pesos não negativos: a próxima menor distância", go: "p:dijkstra" },
+  ]},
+  nconn: { q: "Que pergunta é feita sobre as conexões?", opts: [
+    { t: "Menor número de passos, com todas as arestas de mesmo custo", go: "src" },
+    { t: "Menor custo, com pesos não negativos", go: "p:dijkstra" },
+    { t: "Uma ordem que respeite dependências, ou se há ciclo nelas", go: "p:topo" },
+    { t: "Quais itens estão no mesmo grupo", s: "regiões, componentes, contas que se fundem", go: "comp" },
+    { t: "Numa árvore: a informação precisa fluir por ela", s: "subir das subárvores, descer da raiz, ir por níveis", go: "tree" },
+  ]},
+  nplace: { q: "O que deixa trabalhar sem memória extra?", opts: [
+    { t: "Dois ponteiros em velocidades diferentes medem a lista", s: "meio, ciclo, k-ésimo a partir do fim", go: "p:fastslow" },
+    { t: "Religar os ponteiros, invertendo o sentido", s: "reverter a lista inteira, um trecho, ou em grupos", go: "p:reverse" },
+    { t: "Um nó sentinela antes da cabeça", s: "juntar, particionar, remover: a cabeça pode mudar", go: "p:dummy" },
+    { t: "Valores em [1..n] servem de índice", s: "o próprio array marca o que já apareceu", go: "p:cyclic" },
+    { t: "Identidades de bits", s: "x ^ x = 0, contar 1s, máscaras", go: "p:bits" },
   ]},
 };
 
@@ -921,6 +994,16 @@ const D = {
   iv: "Ordenar por início junta o que se sobrepõe; ordenar por fim maximiza o que cabe; um heap de fins mede quantos estão ativos ao mesmo tempo.",
   design: "Qual operação domina as chamadas? A estrutura existe para deixar exatamente essa operação barata.",
   ans: "Se você sabe testar uma resposta mas não calculá-la, busque-a. Se a melhor escolha local nunca precisa ser desfeita, siga-a. Se o enunciado fala de bits, use as identidades do XOR.",
+  nroot: "Descreva a força bruta e onde ela desperdiça: o que recalcula, ou o que testa sem precisar? Lembrar evita recalcular, descartar evita testar, reaproveitar evita resolver de novo. Esta leitura não depende da forma do input.",
+  nmem: "O que você guarda define a estrutura: presença ou contagem (hash), o valor que falta (complemento), um acumulado para subtrair (prefixo) ou prefixos de texto (trie).",
+  ndisc: "Todo descarte precisa de uma garantia. Diga qual é antes de escolher: uma ordem, a monotonicidade do trecho ou da resposta, a dominância, ou uma escolha local que nunca se desfaz.",
+  ndom: "A pilha monotônica responde por elemento (quem o supera); o deque monotônico responde por janela (o extremo de quem ainda está dentro).",
+  ngreedy: "Greedy só vale com prova. Em intervalos, a prova clássica é ficar com o que termina primeiro; fora deles, procure um argumento de troca e tente um contraexemplo.",
+  nsub: "O estado é o mínimo que decide o resto. Se cabe em \"o melhor que termina aqui\", é Kadane; senão, diga quais índices ou quanto ainda resta.",
+  nopen: "Abertos que fecham em ordem inversa pedem uma pilha. Abertos que fecham pelo tempo, quando só importa quantos são, pedem um heap de fins.",
+  nmax: "Heap quando só o extremo importa; dois heaps quando importa o meio; Dijkstra quando o extremo é uma distância que ainda pode melhorar.",
+  nconn: "Arestas sem peso pedem BFS; pesos não negativos, Dijkstra; dependências, ordem topológica; grupos, percorrer ou unir; numa árvore, a direção em que a informação flui.",
+  nplace: "Sem memória extra, a própria estrutura guarda a informação: a velocidade dos ponteiros, o sentido deles, um nó a mais, o índice de cada valor ou os bits.",
 };
 
 /* Fronteiras: para cada padrão, os vizinhos que mais se confundem com ele.
@@ -1123,15 +1206,22 @@ const isLeaf = go => go.startsWith("p:");
 const leafId = go => go.slice(2);
 const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-// rota (índices de opção) até cada folha; a primeira encontrada vale
+/* duas leituras do mesmo problema, que chegam às mesmas folhas */
+const ROOTS = { root: "Pela forma do input", nroot: "Pelo que a solução precisa fazer" };
+const otherRoot = rt => Object.keys(ROOTS).find(k => k !== rt);
+
+// rota (índices de opção) até cada folha, por leitura; a primeira encontrada vale
 const routes = {};
-(function walk(id, r) {
-  N[id].opts.forEach((o, i) => {
-    const nr = [...r, i];
-    if (isLeaf(o.go)) { if (!routes[leafId(o.go)]) routes[leafId(o.go)] = nr; }
-    else walk(o.go, nr);
-  });
-})("root", []);
+Object.keys(ROOTS).forEach(rt => {
+  routes[rt] = {};
+  (function walk(id, r) {
+    N[id].opts.forEach((o, i) => {
+      const nr = [...r, i];
+      if (isLeaf(o.go)) { if (!routes[rt][leafId(o.go)]) routes[rt][leafId(o.go)] = nr; }
+      else walk(o.go, nr);
+    });
+  })(rt, []);
+});
 
 function reachable(id, acc = new Set()) {
   N[id].opts.forEach(o => isLeaf(o.go) ? acc.add(leafId(o.go)) : reachable(o.go, acc));
@@ -1141,13 +1231,21 @@ function reachable(id, acc = new Set()) {
 /* ---------- estado ---------- */
 let path = [];   // [{ node, i }]
 let openLeaf = null;
+let root = "root";   // leitura atual
+const found = {};    // leitura → padrão a que se chegou respondendo (não por atalho), para o confronto
 
-function goRoute(route) {
-  path = []; let node = "root";
+function goRoute(route, rt = root) {
+  root = rt; path = []; let node = rt;
   for (const i of route) { path.push({ node, i }); const go = N[node].opts[i].go; if (isLeaf(go)) break; node = go; }
 }
+function choose(i) {
+  const node = current();
+  path.push({ node, i });
+  const go = N[node].opts[i].go;
+  if (isLeaf(go)) found[root] = leafId(go);
+}
 function current() {
-  if (!path.length) return "root";
+  if (!path.length) return root;
   const last = path[path.length - 1];
   return N[last.node].opts[last.i].go;
 }
@@ -1199,6 +1297,20 @@ function solvedHTML(s) {
     ${(s.nb || []).map(x => `<p><span class="lbl">Por que não ${esc(x.name)}</span>${esc(x.why)}</p>`).join("")}</div>`;
 }
 
+/* confronto: a mesma folha pelas duas leituras? */
+function confrontHTML(k) {
+  const o = otherRoot(root), there = found[o];
+  if (!there) return `<p class="cmp">Agora confronte: chegue ao padrão pela outra leitura, sem olhar este.</p>
+      <div class="row-btns"><button type="button" class="btn" data-root="${o}">${esc(ROOTS[o])}</button></div>`;
+  if (there === k) return `<p class="cmp ok">As duas leituras chegam a ${esc(P[k].name)}.</p>`;
+  return `<p class="cmp diff">As leituras divergem. ${esc(ROOTS[o])}, você chegou a ${leafChipHTML(there)}. Compare as Fronteiras dos dois padrões: que condição do enunciado decide?</p>`;
+}
+
+function rootsHTML() {
+  return `<div class="roots" role="group" aria-label="Começar por">${Object.keys(ROOTS).map(r =>
+    `<button type="button" class="btn${r === root ? " primary" : ""}" data-root="${r}" aria-pressed="${r === root}">${esc(ROOTS[r])}</button>`).join("")}</div>`;
+}
+
 function renderWalker() {
   const cur = current();
   const crumbs = path.map((st, idx) => {
@@ -1209,6 +1321,7 @@ function renderWalker() {
   if (isLeaf(cur)) {
     const p = P[leafId(cur)];
     body = `<div class="done"><span class="eyebrow">Padrão encontrado</span><h2>${esc(p.name)}</h2>
+      ${found[root] === leafId(cur) ? confrontHTML(leafId(cur)) : ""}
       <div class="row-btns"><button type="button" class="btn" data-back="${path.length - 1}">Voltar uma pergunta</button><button type="button" class="btn primary" data-reset>Recomeçar</button></div></div>`;
   } else {
     const n = N[cur];
@@ -1217,7 +1330,7 @@ function renderWalker() {
       <div class="opts">${n.opts.map((o, i) => `<button type="button" class="opt${isLeaf(o.go) ? " to-leaf" : ""}" data-opt="${i}"><span class="k">${i < 9 ? i + 1 : "·"}</span><span class="t">${esc(o.t)}${o.s ? `<span class="s">${esc(o.s)}</span>` : ""}${previewHTML(o)}</span></button>`).join("")}</div>
       ${path.length ? `<div class="row-btns"><button type="button" class="btn" data-reset>Recomeçar</button></div>` : ""}`;
   }
-  $("#walker").innerHTML = `<ol class="crumbs">${crumbs}</ol>${body}`;
+  $("#walker").innerHTML = `${rootsHTML()}<ol class="crumbs">${crumbs}</ol>${body}`;
 }
 
 function cardHTML(id) {
@@ -1242,6 +1355,24 @@ function renderCard() {
   const cur = current();
   const el = $("#card");
   if (isLeaf(cur)) { el.innerHTML = cardHTML(leafId(cur)); return; }
+  if (cur === "nroot") {
+    el.innerHTML = `<div class="intro" style="display:grid;gap:16px">
+      <span class="eyebrow">Como usar</span>
+      <h2>Leia o problema pelo que ele exige</h2>
+      <ol>
+        <li><b>Força bruta:</b> descreva a solução mais direta e quanto ela custa.</li>
+        <li><b>Desperdício:</b> o que ela recalcula, ou testa sem precisar? É a primeira pergunta ao lado.</li>
+        <li><b>Garantia:</b> diga por que lembrar, descartar ou reaproveitar não perde a resposta. As perguntas seguintes pedem essa garantia.</li>
+      </ol>
+      <div class="example">
+        <span class="eyebrow">Exemplo · #3 Longest Substring Without Repeating Characters</span>
+        <div class="route"><span>Descartar candidatos</span><i>→</i><span>Validade do trecho é monotônica</span><i>→</i><button type="button" class="leafchip" data-leaf="window">Sliding window</button></div>
+      </div>
+      <p><b>Confronto:</b> antes de codar, chegue ao padrão pelas duas leituras. Se elas divergem, uma delas errou ou o problema tem duas saídas; as Fronteiras dos dois padrões dizem qual condição decide.</p>
+      <div class="sec"><h3>${Object.keys(P).length} padrões, os mesmos da outra leitura</h3><div class="chips">${Object.keys(P).map(k => `<button type="button" class="leafchip" data-leaf="${k}">${esc(P[k].name)}</button>`).join("")}</div></div>
+    </div>`;
+    return;
+  }
   if (cur === "root") {
     el.innerHTML = `<div class="intro" style="display:grid;gap:16px">
       <span class="eyebrow">Como usar</span>
@@ -1274,17 +1405,18 @@ function render(scrollCard) {
 }
 
 /* ---------- árvore completa ---------- */
-function treeHTML(id, route) {
+function treeHTML(id, route, rt) {
   return N[id].opts.map((o, i) => {
-    const r = [...route, i].join(",");
+    const r = rt + ":" + [...route, i].join(",");
     if (isLeaf(o.go)) {
       const k = leafId(o.go);
       return `<li class="leaf" data-k="${k}"><span class="edge">${esc(o.t)}</span><button type="button" class="leafchip" data-route="${r}">${esc(P[k].name)}</button></li>`;
     }
-    return `<li class="branch"><span class="edge">${esc(o.t)}</span><span class="qn">${esc(N[o.go].q)}</span><ul>${treeHTML(o.go, [...route, i])}</ul></li>`;
+    return `<li class="branch"><span class="edge">${esc(o.t)}</span><span class="qn">${esc(N[o.go].q)}</span><ul>${treeHTML(o.go, [...route, i], rt)}</ul></li>`;
   }).join("");
 }
-$("#tree").innerHTML = `<li class="branch"><span class="qn">${esc(N.root.q)}</span><ul>${treeHTML("root", [])}</ul></li>`;
+$("#tree").innerHTML = Object.keys(ROOTS).map(rt =>
+  `<li class="branch"><span class="edge">${esc(ROOTS[rt])}</span><span class="qn">${esc(N[rt].q)}</span><ul>${treeHTML(rt, [], rt)}</ul></li>`).join("");
 
 function applyFilter() {
   const q = norm($("#filter").value.trim());
@@ -1306,11 +1438,19 @@ $("#filter").addEventListener("input", applyFilter);
 document.addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
-  if (b.dataset.opt !== undefined) { const node = current(); path.push({ node, i: +b.dataset.opt }); render(true); }
+  if (b.dataset.opt !== undefined) { choose(+b.dataset.opt); render(true); }
+  else if (b.dataset.root) { root = b.dataset.root; path = []; render(); }
   else if (b.dataset.back !== undefined) { path = path.slice(0, +b.dataset.back); render(); }
   else if (b.hasAttribute("data-reset")) { path = []; render(); }
-  else if (b.dataset.leaf) { goRoute(routes[b.dataset.leaf]); render(true); if (window.innerWidth >= 880) $("#walker").scrollIntoView({ behavior: "smooth", block: "start" }); }
-  else if (b.dataset.route) { goRoute(b.dataset.route.split(",").map(Number)); render(true); $(".main").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  else if (b.dataset.leaf) {
+    const k = b.dataset.leaf, rt = routes[root][k] ? root : "root";
+    goRoute(routes[rt][k], rt); render(true);
+    if (window.innerWidth >= 880) $("#walker").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  else if (b.dataset.route) {
+    const [rt, r] = b.dataset.route.split(":");
+    goRoute(r.split(",").map(Number), rt); render(true); $(".main").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   else if (b.hasAttribute("data-copy")) {
     const pre = b.parentElement.querySelector("pre");
     const done = () => { b.textContent = "copiado"; setTimeout(() => b.textContent = "copiar", 1400); };
@@ -1324,12 +1464,12 @@ document.addEventListener("keydown", e => {
   const cur = current();
   if (/^[1-9]$/.test(e.key) && !isLeaf(cur)) {
     const i = +e.key - 1;
-    if (i < N[cur].opts.length) { path.push({ node: cur, i }); render(true); }
+    if (i < N[cur].opts.length) { choose(i); render(true); }
   } else if (e.key === "Backspace" && path.length) { e.preventDefault(); path.pop(); render(); }
 });
 
 /* deep-link: #window abre a ficha direto */
 const h = (location.hash || "").slice(1);
-if (h && routes[h]) goRoute(routes[h]);
+if (h && routes.root[h]) goRoute(routes.root[h], "root");
 render();
 </script>

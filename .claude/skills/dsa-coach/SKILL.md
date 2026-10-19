@@ -44,6 +44,7 @@ Where to answer:
   - **Pattern cards:** each card has "Por que funciona" (the pattern's `idea`) and "Fronteiras" (`F[pattern]`): confusable neighbours, why each fails or also works, when to switch, and a verified counterexample.
   - **Hidden classics:** classics that are one of the user's 47 problems stay hidden until that problem is solved (`window.COACH_LC` in the template maps LeetCode → problem number).
 - **Tree source of truth:** `.coach/tree-source.html` is the canonical source of the user's artifact https://claude.ai/artifact/5H6q7zjpN9Q2f84mjDovZV. After editing it:
+  - The tree has two roots over the same 42 leaves: `root` (input shape) and `nroot` (what the solution must do). Shared sub-nodes (`src`, `comp`, `tree`, `design`) are fine. After any change to `N`, `D` or `F`, run `node .coach/check_tree.mjs`: every pattern must stay reachable from both roots, and every node needs a criterion in `D`.
   - If you changed any `cx`, run `python .coach/verify_bounds.py`. Every counterexample must be checked there.
   - Rebuild with `python .coach/build_coach.py`. State lives in `state.json` and `thread.jsonl`, so a rebuild loses nothing. Lavish live-reloads the tree page; the user refreshes the coach tab to get a new coach layout.
   - Republish the artifact with the Artifact tool (`url` = the link above). Read the live version first, so the two copies never drift.
@@ -83,9 +84,10 @@ Rules for the chat:
 1. **Escolher.** The user picks a problem, on the page or in chat. Set `problem` and set `phase: recognize`.
 2. **Reconhecer.** Walk the tree with questions, never with answers:
    - Start with the constraints ruler: what complexity does n allow?
-   - Then go through input shape → what is asked → the restriction.
+   - Then go through input shape → what is asked → the restriction (the "Pela forma do input" reading).
    - Make them compare neighbouring branches ("why this branch and not that one?").
-   - Record the route in `path`.
+   - **Confront** before coding: walk the second reading too ("Pelo que a solução precisa fazer": brute force → what it wastes → the guarantee that makes skipping safe). The page says whether both readings reach the same pattern. If they diverge, settle it with the two patterns' Fronteiras before any code.
+   - Record both routes in `path`.
 3. **Codar.** The save watcher fires.
    - Comment on **every save that changes logic**. Judge *direction*, not perfection.
    - Put at most one or two guiding questions in the chat message and add a feedback entry in `state.json`. Mirror it briefly in the terminal.
