@@ -1,0 +1,31 @@
+{
+  "phase": "pick",
+  "problem": null,
+  "path": [
+    {"q": "Constraints: n ≤ 10^5", "a": "n² is out; n log n or O(n)"},
+    {"q": "Qual é a forma principal do input?", "a": "Array ou string"},
+    {"q": "O que o enunciado pede sobre o array/string?", "a": "Um par de elementos (a água depende só das duas pontas, não do trecho entre elas)"},
+    {"q": "Dá pra ordenar sem perder o que o problema pede?", "a": "Não: ordenar perde a largura. Raciocínio de fora para dentro: descartar sempre a parede menor", "open": true}
+  ],
+  "question": "Does the drafted bridge (why two pointers works, why not sort / complement hash / DP / moving the taller wall) match your understanding?",
+  "feedback": [
+    {"verdict": "Right setup", "kind": "good", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:25", "text": "`maxArea` plus one index at each end: the outside-in setup.\n\nNext: what is the loop's stop condition?"},
+    {"verdict": "Correct stop condition", "kind": "good", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:31", "text": "`leftIdx < rightIdx`: when they meet, no container remains.\n\nBody: measure the pair, then discard one end."},
+    {"verdict": "Discard rule taking shape", "kind": "info", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:34", "text": "Comparing the two heights to pick which end moves.\n\nWhen must the current pair be measured? What about the `else` / tie?"},
+    {"verdict": "Left move right; check the right move", "kind": "warn", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:35", "text": "`leftIdx++` matches the rule.\n\nWhat does `rightHeight++` change, and in which direction should the right end move? Trace a tie like `[3, 3]`."},
+    {"verdict": "Index now; check direction", "kind": "warn", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:36", "text": "Moves `rightIdx` now. Where does `rightIdx++` point from the last index: inward or outward?\n\nStill open: the tie and measuring the area."},
+    {"verdict": "Area measured at the right time", "kind": "info", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:37", "text": "Formula and placement (before the move) are right.\n\n`maxArea = ...` keeps the best area or the last? Still open: `rightIdx++` direction, tie, `return`."},
+    {"verdict": "Almost there: the tie", "kind": "warn", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:38", "text": "`Math.Max`, `rightIdx--` and `return maxArea` are right.\n\nTrace `[3, 3]`: which `if` fires? Which end is safe to move in a tie?"},
+    {"verdict": "All tests green", "kind": "good", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:42", "text": "The tie case is handled, so every iteration moves an end.\n\nNext: justify complexity and invariant."}
+  ],
+  "solved": [
+    {"n": 1, "title": "Container With Most Water", "leaf": "twoptr",
+     "works": "Começando nas duas pontas e movendo para dentro a parede menor: todo par que usa a parede menor com uma linha mais interna é mais estreito e tem a altura limitada por ela, então nunca bate uma área já medida. O(n) tempo, O(1) espaço.",
+     "nb": [
+       {"name": "ordenar por altura", "why": "Ordenar perde os índices, e a largura é metade da área."},
+       {"name": "hash do complemento", "why": "Não há alvo exato para procurar; queremos o máximo de uma fórmula."},
+       {"name": "programação dinâmica", "why": "A área de cada par sai direto das duas pontas: não há subproblema repetido, e uma tabela de pares seria O(n²)."},
+       {"name": "mover a parede maior", "why": "Pula pares sem teto de altura e perde a resposta: em [1,8,6,2,5,4,8,3,7] dá 8 em vez de 49."}
+     ]}
+  ]
+}

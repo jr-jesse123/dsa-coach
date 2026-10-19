@@ -1,0 +1,1335 @@
+<title>Árvore de Padrões LeetCode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: walker de decisão à esquerda, ficha do padrão à direita; régua de constraints acima, árvore completa abaixo. */
+:root {
+  --bg: #F1F3F7;
+  --surface: #FFFFFF;
+  --ink: #131826;
+  --muted: #5B6476;
+  --line: #D8DDE7;
+  --accent: #2646C4;
+  --accent-soft: #E4E9FB;
+  --leaf: #0E7556;
+  --leaf-soft: #DDF2EA;
+  --warn: #9A5B00;
+  --warn-soft: #FBF0DD;
+  --code-bg: #EDF0F5;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1118; --surface: #151B26; --ink: #E4E8F0; --muted: #8E98AA; --line: #273043;
+    --accent: #8FA3FF; --accent-soft: #1E2747; --leaf: #52CFA0; --leaf-soft: #133029;
+    --warn: #F0B45C; --warn-soft: #2E2414; --code-bg: #0F141D; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1118; --surface: #151B26; --ink: #E4E8F0; --muted: #8E98AA; --line: #273043;
+  --accent: #8FA3FF; --accent-soft: #1E2747; --leaf: #52CFA0; --leaf-soft: #133029;
+  --warn: #F0B45C; --warn-soft: #2E2414; --code-bg: #0F141D; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1140px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 72px; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* header */
+header { display: grid; gap: 10px; }
+header h1 { font-size: clamp(30px, 4.4vw, 46px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; }
+header p { margin: 0; max-width: 64ch; color: var(--muted); font-size: 16px; }
+header p b { color: var(--ink); font-weight: 600; }
+header p.legend { font-size: 13.5px; padding: 10px 14px; border: 1px dashed var(--line); border-radius: 10px; background: var(--surface); }
+
+/* passo 0 */
+.step0 { display: grid; gap: 14px; }
+.step0-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.step0-head h2 { font-size: 20px; font-weight: 700; }
+.step0-head span { color: var(--muted); font-size: 13.5px; }
+.ruler { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.tick { padding: 14px 14px 16px; border-left: 1px solid var(--line); display: grid; gap: 4px; align-content: start; min-width: 0; }
+.tick:first-child { border-left: 0; }
+.tick .n { font-family: var(--f-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tick .o { font-family: var(--f-mono); font-weight: 500; font-size: 17px; color: var(--accent); }
+.tick .w { font-size: 13px; color: var(--ink); }
+.derive { display: grid; gap: 6px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 13.5px; }
+.derive p { margin: 0; }
+.derive code { font-family: var(--f-mono); font-size: 12.5px; color: var(--accent); }
+@media (max-width: 900px) {
+  .ruler { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tick:nth-child(5) { border-left: 0; }
+  .tick:nth-child(n+5) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 520px) {
+  .ruler { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tick:nth-child(5) { border-left: 1px solid var(--line); }
+  .tick:nth-child(odd) { border-left: 0; }
+  .tick:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+
+/* main */
+.main { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px; align-items: start; }
+@media (max-width: 880px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; display: grid; gap: 18px; min-width: 0; }
+
+.crumbs { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.crumbs:empty { display: none; }
+.crumbs button { width: 100%; text-align: left; background: none; border: 0; padding: 7px 10px 7px 26px; border-radius: 8px; cursor: pointer; position: relative; display: grid; gap: 1px; }
+.crumbs button::before { content: ""; position: absolute; left: 10px; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.crumbs button::after { content: ""; position: absolute; left: 7px; top: 15px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.crumbs button:hover { background: var(--accent-soft); }
+.crumbs .cq { font-size: 12.5px; color: var(--muted); }
+.crumbs .ca { font-size: 14px; font-weight: 500; }
+
+.q h2 { font-size: 22px; font-weight: 700; line-height: 1.2; margin-top: 4px; }
+.opts { display: grid; gap: 8px; }
+.opt { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start; text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; cursor: pointer; transition: border-color .12s, background .12s; }
+.opt:hover { border-color: var(--accent); background: var(--accent-soft); }
+.opt .k { font-family: var(--f-mono); font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 5px; text-align: center; line-height: 20px; background: var(--surface); }
+.opt .t { font-size: 14.5px; }
+.opt .s { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.opt.to-leaf .t::after { content: " → padrão"; font-family: var(--f-mono); font-size: 11px; color: var(--leaf); }
+
+.done { display: grid; gap: 10px; padding: 16px; border-radius: 10px; background: var(--leaf-soft); }
+.done .eyebrow { color: var(--leaf); }
+.done h2 { font-size: 22px; }
+.row-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 13.5px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+
+/* card */
+.card h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; }
+.card .eyebrow.leafc { color: var(--leaf); }
+.idea { font-size: 16px; margin: 0; max-width: 62ch; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.facts > div { background: var(--surface); padding: 10px 12px; display: grid; gap: 3px; min-width: 0; }
+.facts dt { font-family: var(--f-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; font-size: 13.5px; }
+@media (max-width: 560px) { .facts { grid-template-columns: minmax(0, 1fr); } }
+.sec { display: grid; gap: 8px; }
+.sec h3 { font-family: var(--f-mono); font-size: 11.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sig { font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px dashed var(--line); background: var(--bg); }
+.code { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--f-mono); font-size: 12.8px; line-height: 1.6; tab-size: 4; }
+.code .cm { color: var(--muted); font-style: italic; }
+.code .copy { position: absolute; top: 8px; right: 8px; font-family: var(--f-mono); font-size: 11px; padding: 3px 8px; }
+.classics { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.classics li { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 8px; font-size: 14px; }
+.classics .num { font-family: var(--f-mono); font-size: 13px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; padding-top: 1px; }
+.classics a { color: var(--ink); text-decoration-color: var(--line); text-underline-offset: 3px; }
+.classics a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+.prem { font-family: var(--f-mono); font-size: 10.5px; color: var(--warn); margin-left: 6px; }
+.trap { border-radius: 10px; padding: 12px 14px; background: var(--warn-soft); display: grid; gap: 4px; }
+.trap .eyebrow { color: var(--warn); }
+.trap p { margin: 0; font-size: 14px; }
+
+/* o que separa as opções de uma pergunta + prévia do que existe abaixo de cada uma */
+.disc { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 62ch; }
+.opt .pv { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.mini { font-size: 11.5px; line-height: 19px; padding: 0 8px; border-radius: 999px; background: var(--leaf-soft); color: var(--leaf); white-space: nowrap; }
+.mini.more { background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
+.got { font-family: var(--f-mono); font-size: 11px; color: var(--leaf); margin-left: 6px; white-space: nowrap; }
+
+/* mapa a partir da pergunta atual */
+.map, .map ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.map ul { gap: 10px; padding-left: 14px; margin-top: 8px; border-left: 1px solid var(--line); }
+.map li { display: grid; gap: 3px; min-width: 0; }
+.map .mt { font-size: 14px; font-weight: 500; }
+.map .ms { font-size: 12.5px; color: var(--muted); }
+.map .mq { font-family: var(--f-display); font-weight: 700; font-size: 14.5px; margin-top: 4px; }
+.map .ml { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+/* fronteiras: vizinhos parecidos, por que não servem e quando passam a servir */
+.bounds { display: grid; gap: 10px; }
+.bound { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; min-width: 0; }
+.bound .bh { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.bound .bn { font-weight: 600; font-size: 14px; }
+.verd { font-family: var(--f-mono); font-size: 11px; padding: 1px 8px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); }
+.verd.alt { background: var(--accent-soft); color: var(--accent); }
+.verd.see { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.bound p { margin: 0; font-size: 14px; }
+.bound .lbl, .solved-item .lbl { font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 6px; }
+.bound code { font-family: var(--f-mono); font-size: 12.5px; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+
+/* problemas que o leitor já resolveu neste padrão (vem do painel de estudo, quando existe) */
+.solved { display: grid; gap: 8px; }
+.solved-item { border-radius: 10px; padding: 12px 14px; background: var(--leaf-soft); display: grid; gap: 4px; min-width: 0; }
+.solved-item b { font-weight: 600; }
+.solved-item p { margin: 0; font-size: 14px; }
+.hidden-note { margin: 0; font-size: 13px; color: var(--muted); }
+
+.intro ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 62ch; }
+.intro ol b { font-weight: 600; }
+.example { border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 10px; background: var(--bg); }
+.example .route { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
+.example .route span { padding: 3px 8px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); }
+.example .route i { color: var(--muted); font-style: normal; }
+
+.leafchip { border: 1px solid transparent; background: var(--leaf-soft); color: var(--leaf); border-radius: 999px; padding: 3px 11px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.leafchip:hover { border-color: var(--leaf); }
+
+/* árvore completa */
+.full { display: grid; gap: 16px; }
+.full-head { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; justify-content: space-between; }
+.full-head h2 { font-size: 20px; font-weight: 700; }
+.full-head p { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; max-width: 60ch; }
+.filter { display: grid; gap: 4px; min-width: 0; flex: 0 1 320px; }
+.filter label { font-family: var(--f-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.filter input { width: 100%; font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.results { display: flex; flex-wrap: wrap; gap: 6px; }
+.results:empty { display: none; }
+.results .none { color: var(--muted); font-size: 13.5px; }
+.tree-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 18px 8px; overflow-x: auto; }
+.tree, .tree ul { list-style: none; margin: 0; }
+.tree { padding-left: 8px; }
+.tree ul { padding-left: 20px; margin-left: 9px; border-left: 1px solid var(--line); }
+.tree li { padding: 3px 0; }
+.tree .qn { font-family: var(--f-display); font-weight: 700; font-size: 15px; }
+.tree .edge { color: var(--muted); font-size: 13.5px; }
+.tree .edge::before { content: "— "; color: var(--line); }
+.tree .branch > .edge + .qn { display: block; margin-top: 2px; }
+.tree li.leaf { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.tree.filtering li.leaf:not(.hit) { opacity: .35; }
+.tree li.leaf.hit .leafchip { border-color: var(--leaf); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Reconhecimento de padrões · templates em C#</span>
+    <h1>Árvore de Padrões LeetCode</h1>
+    <p>Todo problema se reduz a <b>uma estrutura de dados + uma operação</b> que preserva um invariante. Responda às perguntas sobre o enunciado e a árvore te leva ao padrão, com os sinais que o denunciam, o template e os clássicos para treinar.</p>
+    <p class="legend"><b>Siglas:</b> <b>DP</b> = programação dinâmica (tabela de subproblemas). Não confunda com <b>dois ponteiros</b> (two pointers), que são dois índices andando pelo array. Aqui a árvore sempre escreve os dois nomes por extenso.</p>
+  </header>
+
+  <section class="step0" aria-labelledby="s0">
+    <div class="step0-head">
+      <h2 id="s0">Passo 0: leia os constraints antes do enunciado</h2>
+      <span>Régua: ~10⁸ operações simples por segundo</span>
+    </div>
+    <div class="ruler">
+      <div class="tick"><span class="n">n ≤ 11</span><span class="o">O(n!)</span><span class="w">Permutações, backtracking puro</span></div>
+      <div class="tick"><span class="n">n ≤ 25</span><span class="o">O(2ⁿ)</span><span class="w">Subconjuntos, bitmask, backtracking</span></div>
+      <div class="tick"><span class="n">n ≤ 500</span><span class="o">O(n³)</span><span class="w">Prog. dinâmica intervalar, Floyd-Warshall</span></div>
+      <div class="tick"><span class="n">n ≤ 10⁴</span><span class="o">O(n²)</span><span class="w">Prog. dinâmica 2D, todos os pares</span></div>
+      <div class="tick"><span class="n">n ≤ 5·10⁶</span><span class="o">O(n log n)</span><span class="w">Sort, heap, binary search, hash. Com constantes, 10⁶ é o teto seguro</span></div>
+      <div class="tick"><span class="n">n ≤ 10⁸</span><span class="o">O(n)</span><span class="w">Uma passada: janela, dois ponteiros, prefixo, pilha</span></div>
+      <div class="tick"><span class="n">n ≥ 10⁹</span><span class="o">O(log n)</span><span class="w">Binary search na resposta, matemática</span></div>
+    </div>
+    <div class="derive">
+      <p><b>Como derivar a tabela:</b> o orçamento é ~10⁸. Resolva <code>f(n) = 10⁸</code> para o n máximo. Em <code>n²</code>, <code>n = √10⁸ = 10⁴</code>. Em <code>n³</code>, <code>n = ∛10⁸ ≈ 500</code>. Em <code>n log n</code>, <code>log₂ n ≈ 22</code>, então <code>n ≈ 10⁸ / 22 ≈ 5·10⁶</code>.</p>
+      <p><b>Exemplo de uso:</b> com <code>n = 10⁵</code>, <code>n² = 10¹⁰</code> estoura o orçamento e <code>n log n ≈ 1,7·10⁶</code> cabe. Sobram <code>O(n log n)</code> e <code>O(n)</code>.</p>
+    </div>
+  </section>
+
+  <section class="main" aria-label="Percorrer a árvore">
+    <div class="panel" id="walker"></div>
+    <div class="panel card" id="card"></div>
+  </section>
+
+  <section class="full" aria-labelledby="sfull">
+    <div class="full-head">
+      <div>
+        <h2 id="sfull">Árvore completa</h2>
+        <p>Todos os caminhos de uma vez. Clique num padrão para abrir a ficha. Filtre por uma palavra do enunciado ("subarray", "ordenado", "k-ésimo").</p>
+      </div>
+      <div class="filter">
+        <label for="filter">Filtrar por sinal</label>
+        <input id="filter" type="search" placeholder="ex.: substring, prefixo, intervalo" autocomplete="off">
+      </div>
+    </div>
+    <div class="results" id="results"></div>
+    <div class="tree-wrap"><ul class="tree" id="tree"></ul></div>
+  </section>
+</div>
+
+<script>
+const N = {
+  root: { q: "Qual é a forma principal do input?", opts: [
+    { t: "Array ou string", go: "arr" },
+    { t: "Linked list", go: "ll" },
+    { t: "Árvore binária ou BST", go: "tree" },
+    { t: "Grafo, grid ou relações entre itens", s: "conexões, dependências, vizinhos num tabuleiro", go: "graph" },
+    { t: "Lista de intervalos [início, fim]", go: "iv" },
+    { t: "Sequência de operações / \"implemente a classe\"", s: "o enunciado define métodos que serão chamados muitas vezes", go: "design" },
+    { t: "Um número, ou um espaço de respostas possíveis", s: "\"qual a menor capacidade…\", \"em no máximo D dias\"", go: "ans" },
+  ]},
+  arr: { q: "O que o enunciado pede sobre o array/string?", opts: [
+    { t: "Todas as combinações, subconjuntos, permutações ou arranjos válidos", s: "a saída é uma lista de listas", go: "p:backtrack" },
+    { t: "Um ótimo (máx/mín) ou o número de formas, e cada escolha afeta as próximas", s: "programação dinâmica (DP): subproblemas que se repetem", go: "dp" },
+    { t: "Algo sobre um subarray/substring contíguo", go: "contig" },
+    { t: "Um par ou trio de elementos que satisfaz uma condição", go: "pair" },
+    { t: "Para cada elemento, o próximo maior/menor (ou a distância até ele)", go: "p:monostack" },
+    { t: "Buscar valor ou posição num array ordenado (mesmo que rotacionado)", go: "p:binsearch" },
+    { t: "Top K, K-ésimo maior, K mais frequentes ou mais próximos", go: "p:heap" },
+    { t: "Duplicados, frequências, agrupar iguais", s: "anagramas, existência, contagem", go: "p:hash" },
+    { t: "Parênteses, expressões, aninhamento", go: "p:stack" },
+    { t: "Valores em [1..n]; achar ausente/duplicado com O(1) de espaço", go: "p:cyclic" },
+    { t: "Muitas palavras: prefixos, autocomplete, buscar palavras", go: "p:trie" },
+  ]},
+  contig: { q: "Qual é a condição sobre o trecho contíguo?", opts: [
+    { t: "Uma restrição que quebra ao crescer e volta ao encolher", s: "≤ k distintos, sem repetir, soma ≥ alvo com todos positivos", go: "p:window" },
+    { t: "Soma (ou XOR) exatamente k, contar subarrays", s: "e pode haver números negativos", go: "p:prefix" },
+    { t: "A maior soma (ou produto) de um subarray", go: "p:kadane" },
+    { t: "O máximo/mínimo de cada janela de tamanho k", go: "p:deque" },
+  ]},
+  pair: { q: "O que define o par?", opts: [
+    { t: "Um alvo exato", s: "soma = k, diferença = d, produto = p", go: "pairtgt" },
+    { t: "O melhor par segundo uma fórmula", s: "máx/mín de algo que usa os valores e as posições: dois ponteiros vindo das pontas, a ordem já são as posições", go: "p:twoptr" },
+  ]},
+  pairtgt: { q: "Dá pra ordenar (ou já está ordenado) sem perder o que o problema pede?", opts: [
+    { t: "Sim: só importam os valores, ou o input já vem ordenado", s: "dois ponteiros, um em cada ponta", go: "p:twoptr" },
+    { t: "Não: preciso dos índices originais, ou de uma única passada", s: "\"já vi o valor que completa este?\"", go: "p:complement" },
+  ]},
+  dp: { q: "Programação dinâmica: qual é o formato do estado?", opts: [
+    { t: "Uma posição i numa sequência", s: "pegar ou pular, chegar ao degrau i, prefixo até i", go: "p:dp1" },
+    { t: "Duas strings/sequências: posição i numa e j na outra", go: "p:dp2" },
+    { t: "Itens + uma capacidade ou alvo", s: "soma, moedas, peso", go: "p:knap" },
+    { t: "Grid, andando só para a direita e para baixo", go: "p:dpgrid" },
+    { t: "Um trecho [i..j]", s: "palíndromo, cortar, estourar: custo depende dos vizinhos", go: "p:dpint" },
+    { t: "Na verdade a melhor escolha local nunca precisa ser desfeita", s: "procure um contraexemplo antes de confiar", go: "p:greedy" },
+  ]},
+  ll: { q: "O que é preciso fazer na lista?", opts: [
+    { t: "Detectar ciclo, achar o meio, k-ésimo a partir do fim", go: "p:fastslow" },
+    { t: "Reverter (inteira, um trecho, em grupos de k) ou reordenar", go: "p:reverse" },
+    { t: "Juntar, particionar ou remover nós (a cabeça pode mudar)", go: "p:dummy" },
+    { t: "Juntar K listas ordenadas", go: "p:heap" },
+  ]},
+  tree: { q: "A resposta depende de quê?", opts: [
+    { t: "Do nível ou profundidade", s: "por nível, visão lateral, menor profundidade", go: "p:bfstree" },
+    { t: "Da ordem dos valores numa BST", s: "validar, k-ésimo menor, soma em range", go: "p:inorder" },
+    { t: "De informação que sobe das subárvores", s: "altura, diâmetro, balanceada, LCA, max path", go: "p:postorder" },
+    { t: "De informação que desce da raiz", s: "caminhos raiz→folha, soma acumulada no caminho", go: "p:preorder" },
+  ]},
+  graph: { q: "Que pergunta é feita sobre o grafo?", opts: [
+    { t: "Menor número de passos (arestas sem peso, grid)", go: "src" },
+    { t: "Menor custo com pesos não negativos", go: "p:dijkstra" },
+    { t: "Uma ordem que respeite dependências / detectar ciclo em grafo dirigido", go: "p:topo" },
+    { t: "Contar ou medir regiões/componentes", s: "ilhas, províncias, pintar área", go: "comp" },
+  ]},
+  src: { q: "De onde parte a busca?", opts: [
+    { t: "De uma única origem", go: "p:bfs" },
+    { t: "De várias origens ao mesmo tempo", s: "tudo apodrece/espalha junto, distância até o mais próximo", go: "p:msbfs" },
+  ]},
+  comp: { q: "As conexões são dadas de uma vez ou chegam uma a uma?", opts: [
+    { t: "De uma vez: só preciso percorrer", go: "p:flood" },
+    { t: "Uma a uma, com perguntas \"estão no mesmo grupo?\"", s: "aresta redundante, mesclar contas, Kruskal", go: "p:uf" },
+  ]},
+  iv: { q: "O que fazer com os intervalos?", opts: [
+    { t: "Mesclar, inserir, intersectar", go: "p:merge" },
+    { t: "Quantos se sobrepõem no mesmo instante", s: "salas de reunião, lotação", go: "p:rooms" },
+    { t: "Máximo de não sobrepostos / mínimo a remover", s: "flechas, cadeia de pares", go: "p:byend" },
+  ]},
+  design: { q: "Que operação precisa ser rápida?", opts: [
+    { t: "Mediana de um fluxo de números", go: "p:twoheaps" },
+    { t: "get/put em O(1) expulsando o menos recente", go: "p:lru" },
+    { t: "Mínimo atual de uma pilha em O(1)", go: "p:minstack" },
+    { t: "Soma/contagem num range com atualizações pontuais", go: "p:fenwick" },
+    { t: "Os K maiores de um fluxo", go: "p:heap" },
+  ]},
+  ans: { q: "Como é o problema?", opts: [
+    { t: "Menor/maior X tal que \"dá pra fazer com X\"", s: "capacidade, velocidade, número de dias", go: "p:bsanswer" },
+    { t: "Decidir passo a passo com a melhor escolha local", s: "pular, abastecer, particionar", go: "p:greedy" },
+    { t: "Bits: elemento único, contar 1s, XOR, somar sem +", go: "p:bits" },
+  ]},
+};
+
+const lc = (n, slug, name, prem) => ({ n, slug, name, prem });
+const P = {
+  window: { name: "Sliding window", ds: "Dois índices + hashmap/contador", op: "Expandir r; contrair l enquanto inválida", cx: "O(n) tempo · O(k) espaço",
+    idea: "Cada índice entra e sai da janela no máximo uma vez. Funciona porque a validade é monotônica: se [l..r] é inválida, qualquer janela maior que a contenha também é.",
+    sig: ["substring mais longa / subarray mais curto", "no máximo k distintos", "sem caracteres repetidos", "contém todos os caracteres de t", "todos positivos, soma ≥ alvo"],
+    tpl: `var count = new Dictionary<char, int>();
+int l = 0, best = 0;
+for (int r = 0; r < s.Length; r++) {
+    count[s[r]] = count.GetValueOrDefault(s[r]) + 1;   // expande
+    while (Invalida(count)) {                           // contrai até voltar a valer
+        if (--count[s[l]] == 0) count.Remove(s[l]);
+        l++;
+    }
+    best = Math.Max(best, r - l + 1);
+}`,
+    cl: [lc(3,"longest-substring-without-repeating-characters","Longest Substring Without Repeating Characters"), lc(209,"minimum-size-subarray-sum","Minimum Size Subarray Sum"), lc(424,"longest-repeating-character-replacement","Longest Repeating Character Replacement"), lc(1004,"max-consecutive-ones-iii","Max Consecutive Ones III"), lc(76,"minimum-window-substring","Minimum Window Substring")],
+    trap: "Com números negativos a monotonicidade quebra (encolher pode aumentar a soma). Aí o padrão é prefix sum, não janela." },
+  prefix: { name: "Prefix sum + hashmap", ds: "Dictionary<prefixo, contagem>", op: "Procurar prefixo − k entre prefixos anteriores", cx: "O(n) · O(n)",
+    idea: "soma(i..j) = P[j] − P[i−1]. Contar subarrays com soma k vira contar quantos prefixos anteriores valem P[j] − k: um Two Sum sobre prefixos.",
+    sig: ["número de subarrays com soma k", "pode ter negativos", "soma divisível por k", "mesma quantidade de 0s e 1s"],
+    tpl: `var freq = new Dictionary<int, int> { [0] = 1 };  // prefixo vazio
+int prefix = 0, ans = 0;
+foreach (var x in nums) {
+    prefix += x;
+    ans += freq.GetValueOrDefault(prefix - k);      // prefixos que fecham soma k
+    freq[prefix] = freq.GetValueOrDefault(prefix) + 1;
+}
+return ans;`,
+    cl: [lc(560,"subarray-sum-equals-k","Subarray Sum Equals K"), lc(525,"contiguous-array","Contiguous Array"), lc(523,"continuous-subarray-sum","Continuous Subarray Sum"), lc(974,"subarray-sums-divisible-by-k","Subarray Sums Divisible by K"), lc(238,"product-of-array-except-self","Product of Array Except Self")],
+    trap: "Esquecer de semear {0: 1} perde os subarrays que começam no índice 0. Para divisibilidade use o resto como chave (e corrija resto negativo)." },
+  kadane: { name: "Kadane", ds: "Duas variáveis", op: "Estender o trecho ou recomeçar", cx: "O(n) · O(1)",
+    idea: "É programação dinâmica com estado do tamanho de uma variável: a melhor soma terminando em i é nums[i] sozinho ou nums[i] somado à melhor terminando em i−1.",
+    sig: ["maior soma de subarray contíguo", "lucro máximo com uma compra e uma venda", "versão circular"],
+    tpl: `int cur = nums[0], best = nums[0];
+for (int i = 1; i < nums.Length; i++) {
+    cur = Math.Max(nums[i], cur + nums[i]);   // estende ou recomeça
+    best = Math.Max(best, cur);
+}
+return best;`,
+    cl: [lc(53,"maximum-subarray","Maximum Subarray"), lc(121,"best-time-to-buy-and-sell-stock","Best Time to Buy and Sell Stock"), lc(152,"maximum-product-subarray","Maximum Product Subarray"), lc(918,"maximum-sum-circular-subarray","Maximum Sum Circular Subarray")],
+    trap: "Produto máximo precisa guardar também o mínimo corrente: negativo × negativo vira o novo máximo." },
+  deque: { name: "Deque monotônico", ds: "Deque de índices, valores decrescentes", op: "Expulsar pelo fundo quem perdeu utilidade; pela frente quem saiu da janela", cx: "O(n) · O(k)",
+    idea: "Se um elemento é menor e mais antigo que outro, ele nunca mais será o máximo de nenhuma janela futura. Pode ser descartado.",
+    sig: ["máximo de cada janela de tamanho k", "janela com max − min ≤ limite", "dp[i] depende do melhor dos últimos k"],
+    tpl: `var dq = new LinkedList<int>();   // índices; valores decrescentes
+var res = new List<int>();
+for (int i = 0; i < nums.Length; i++) {
+    if (dq.Count > 0 && dq.First.Value <= i - k) dq.RemoveFirst();          // saiu da janela
+    while (dq.Count > 0 && nums[dq.Last.Value] <= nums[i]) dq.RemoveLast(); // nunca mais será máximo
+    dq.AddLast(i);
+    if (i >= k - 1) res.Add(nums[dq.First.Value]);
+}`,
+    cl: [lc(239,"sliding-window-maximum","Sliding Window Maximum"), lc(1438,"longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit","Longest Continuous Subarray With Absolute Diff ≤ Limit"), lc(1696,"jump-game-vi","Jump Game VI"), lc(862,"shortest-subarray-with-sum-at-least-k","Shortest Subarray with Sum at Least K")],
+    trap: "Guarde índices, não valores: você precisa saber quando o elemento saiu da janela." },
+  twoptr: { name: "Dois ponteiros (two pointers)", ds: "Array ordenado + dois índices", op: "Mover o ponteiro que pode melhorar a resposta", cx: "O(n) após sort O(n log n) · O(1)",
+    idea: "Com o array ordenado, cada comparação elimina uma fileira inteira de pares candidatos. Se a soma está pequena, nenhum par usando nums[l] com algo à esquerda de r pode servir.",
+    sig: ["array ordenado", "par/trio com soma alvo", "palíndromo", "maior área entre duas linhas", "remover in-place"],
+    tpl: `int l = 0, r = nums.Length - 1;
+while (l < r) {
+    int sum = nums[l] + nums[r];
+    if (sum == target) return new[] { l, r };
+    if (sum < target) l++;   // precisa de mais
+    else r--;                // precisa de menos
+}`,
+    cl: [lc(125,"valid-palindrome","Valid Palindrome"), lc(167,"two-sum-ii-input-array-is-sorted","Two Sum II"), lc(15,"3sum","3Sum"), lc(11,"container-with-most-water","Container With Most Water"), lc(42,"trapping-rain-water","Trapping Rain Water")],
+    trap: "3Sum: ordene, fixe i, rode dois ponteiros no resto e pule duplicados nos três índices." },
+  complement: { name: "Hash do complemento", ds: "Dictionary<valor, índice>", op: "Antes de inserir x, procurar alvo − x", cx: "O(n) · O(n)",
+    idea: "Troca a busca O(n) pelo parceiro por uma consulta O(1): \"já vi o número que completa este?\"",
+    sig: ["retorne os índices", "input não ordenado", "uma passada", "pares a distância ≤ k"],
+    tpl: `var seen = new Dictionary<int, int>();   // valor → índice
+for (int i = 0; i < nums.Length; i++) {
+    if (seen.TryGetValue(target - nums[i], out var j))
+        return new[] { j, i };
+    seen[nums[i]] = i;
+}`,
+    cl: [lc(1,"two-sum","Two Sum"), lc(219,"contains-duplicate-ii","Contains Duplicate II"), lc(1679,"max-number-of-k-sum-pairs","Max Number of K-Sum Pairs"), lc(454,"4sum-ii","4Sum II")],
+    trap: "Consulte antes de inserir; senão x pareia consigo mesmo quando alvo = 2x." },
+  monostack: { name: "Pilha monotônica", ds: "Stack<int> de índices", op: "Ao chegar um valor, desempilhar todos que ele resolve", cx: "O(n) amortizado · O(n)",
+    idea: "A pilha guarda os elementos que ainda esperam sua resposta. Cada um é empilhado e desempilhado uma única vez, por isso o while dentro do for continua O(n).",
+    sig: ["próximo maior/menor elemento", "quantos dias até esquentar", "maior retângulo no histograma", "span de preços"],
+    tpl: `var ans = new int[n];        // 0 = não existe
+var st = new Stack<int>();   // índices esperando seu "próximo maior"
+for (int i = 0; i < n; i++) {
+    while (st.Count > 0 && t[st.Peek()] < t[i]) {
+        int j = st.Pop();
+        ans[j] = i - j;      // i resolveu j
+    }
+    st.Push(i);
+}`,
+    cl: [lc(739,"daily-temperatures","Daily Temperatures"), lc(496,"next-greater-element-i","Next Greater Element I"), lc(503,"next-greater-element-ii","Next Greater Element II"), lc(901,"online-stock-span","Online Stock Span"), lc(84,"largest-rectangle-in-histogram","Largest Rectangle in Histogram")],
+    trap: "A direção sai da pergunta: \"próximo maior\" mantém a pilha decrescente; \"próximo menor\", crescente. Circular: percorra 2n com i % n." },
+  binsearch: { name: "Binary search", ds: "Array ordenado", op: "Descartar metade por comparação", cx: "O(log n) · O(1)",
+    idea: "Não precisa de ordenação total; precisa de um predicado que vale falso…falso, verdadeiro…verdadeiro. A busca acha a primeira posição verdadeira.",
+    sig: ["ordenado", "rotacionado", "O(log n) exigido", "primeira/última ocorrência", "matriz ordenada"],
+    tpl: `int lo = 0, hi = nums.Length;        // intervalo [lo, hi)
+while (lo < hi) {
+    int mid = lo + (hi - lo) / 2;
+    if (nums[mid] < target) lo = mid + 1;
+    else hi = mid;
+}
+return lo;   // primeiro i com nums[i] >= target`,
+    cl: [lc(704,"binary-search","Binary Search"), lc(34,"find-first-and-last-position-of-element-in-sorted-array","Find First and Last Position of Element"), lc(74,"search-a-2d-matrix","Search a 2D Matrix"), lc(153,"find-minimum-in-rotated-sorted-array","Find Minimum in Rotated Sorted Array"), lc(33,"search-in-rotated-sorted-array","Search in Rotated Sorted Array")],
+    trap: "Misturar convenções ([lo, hi] com [lo, hi)) causa loop infinito ou elemento pulado. Escolha uma e use sempre." },
+  heap: { name: "Heap (top K)", ds: "PriorityQueue de tamanho k", op: "Inserir e descartar o pior quando passar de k", cx: "O(n log k) · O(k)",
+    idea: "Para os K maiores, mantenha um min-heap de tamanho K: o topo é o menor dos sobreviventes, ou seja, o K-ésimo maior.",
+    sig: ["k maiores/menores", "k-ésimo", "k mais frequentes", "k pontos mais próximos", "juntar k listas ordenadas"],
+    tpl: `var pq = new PriorityQueue<int, int>();   // min-heap pela prioridade
+foreach (var x in nums) {
+    pq.Enqueue(x, x);
+    if (pq.Count > k) pq.Dequeue();           // descarta o menor
+}
+return pq.Peek();                             // k-ésimo maior`,
+    cl: [lc(703,"kth-largest-element-in-a-stream","Kth Largest Element in a Stream"), lc(215,"kth-largest-element-in-an-array","Kth Largest Element in an Array"), lc(347,"top-k-frequent-elements","Top K Frequent Elements"), lc(973,"k-closest-points-to-origin","K Closest Points to Origin"), lc(23,"merge-k-sorted-lists","Merge k Sorted Lists")],
+    trap: "K maiores usam min-heap (e vice-versa). Com frequências limitadas a n, bucket sort resolve em O(n)." },
+  hash: { name: "Hash map / set", ds: "Dictionary ou HashSet", op: "Contar, agrupar por chave canônica, testar existência", cx: "O(n) · O(n)",
+    idea: "Escolha uma chave canônica: tudo que deve cair no mesmo grupo precisa gerar a mesma chave (palavra ordenada, vetor de 26 contagens).",
+    sig: ["contém duplicado", "anagrama", "agrupar", "sequência consecutiva mais longa", "O(n) sem ordenar"],
+    tpl: `var groups = new Dictionary<string, List<string>>();
+foreach (var w in strs) {
+    var key = new string(w.OrderBy(c => c).ToArray());  // chave canônica
+    if (!groups.TryGetValue(key, out var list)) groups[key] = list = new();
+    list.Add(w);
+}
+return groups.Values.ToList<IList<string>>();`,
+    cl: [lc(217,"contains-duplicate","Contains Duplicate"), lc(242,"valid-anagram","Valid Anagram"), lc(49,"group-anagrams","Group Anagrams"), lc(36,"valid-sudoku","Valid Sudoku"), lc(128,"longest-consecutive-sequence","Longest Consecutive Sequence")],
+    trap: "Sequência consecutiva: só comece a contar em x se x − 1 não está no set; senão vira O(n²)." },
+  stack: { name: "Pilha", ds: "Stack", op: "Empilhar na abertura, conferir no fechamento", cx: "O(n) · O(n)",
+    idea: "Aninhamento é LIFO: o último aberto é o primeiro a fechar. A pilha também guarda o contexto antes de entrar num nível novo (decode string, calculadora).",
+    sig: ["parênteses válidos", "notação pós-fixa", "string codificada k[...]", "simplificar caminho", "calculadora"],
+    tpl: `var st = new Stack<char>();
+var open = new Dictionary<char, char> { [')'] = '(', [']'] = '[', ['}'] = '{' };
+foreach (var c in s) {
+    if (!open.ContainsKey(c)) st.Push(c);
+    else if (st.Count == 0 || st.Pop() != open[c]) return false;
+}
+return st.Count == 0;`,
+    cl: [lc(20,"valid-parentheses","Valid Parentheses"), lc(150,"evaluate-reverse-polish-notation","Evaluate Reverse Polish Notation"), lc(71,"simplify-path","Simplify Path"), lc(394,"decode-string","Decode String"), lc(224,"basic-calculator","Basic Calculator")],
+    trap: "Checar pilha vazia antes do Pop, e checar se sobrou algo no final." },
+  cyclic: { name: "Cyclic sort", ds: "O próprio array", op: "Colocar o valor v no índice v − 1", cx: "O(n) · O(1)",
+    idea: "Quando os valores estão em 1..n, o próprio array vira o hash set: a posição v − 1 diz se v apareceu.",
+    sig: ["valores no intervalo [1, n]", "sem espaço extra", "número ausente/duplicado", "primeiro positivo faltando"],
+    tpl: `int i = 0;
+while (i < n) {
+    int correct = nums[i] - 1;                 // v pertence ao índice v-1
+    if (nums[i] >= 1 && nums[i] <= n && nums[i] != nums[correct])
+        (nums[i], nums[correct]) = (nums[correct], nums[i]);
+    else i++;
+}
+// o primeiro i com nums[i] != i + 1 denuncia o ausente`,
+    cl: [lc(268,"missing-number","Missing Number"), lc(448,"find-all-numbers-disappeared-in-an-array","Find All Numbers Disappeared in an Array"), lc(442,"find-all-duplicates-in-an-array","Find All Duplicates in an Array"), lc(41,"first-missing-positive","First Missing Positive")],
+    trap: "O 287 (Find the Duplicate Number) proíbe modificar o array: ali a saída é fast & slow, tratando valor como ponteiro." },
+  trie: { name: "Trie", ds: "Árvore de prefixos (26 filhos + flag de fim)", op: "Descer caractere a caractere", cx: "O(L) por operação",
+    idea: "Palavras com o mesmo prefixo compartilham o caminho. Buscar um prefixo custa o tamanho do prefixo, não o número de palavras.",
+    sig: ["startsWith", "autocomplete", "várias palavras num tabuleiro", "curinga '.'"],
+    tpl: `class Node { public Node[] Next = new Node[26]; public bool End; }
+
+void Insert(Node root, string w) {
+    var cur = root;
+    foreach (var c in w) cur = cur.Next[c - 'a'] ??= new Node();
+    cur.End = true;
+}`,
+    cl: [lc(208,"implement-trie-prefix-tree","Implement Trie"), lc(211,"design-add-and-search-words-data-structure","Design Add and Search Words"), lc(1268,"search-suggestions-system","Search Suggestions System"), lc(212,"word-search-ii","Word Search II")],
+    trap: "Word Search II: remova da trie as palavras já encontradas (ou pode os nós) para não estourar o tempo." },
+  backtrack: { name: "Backtracking", ds: "Lista caminho + recursão", op: "Escolher, explorar, desfazer", cx: "O(2ⁿ) ou O(n!): o tamanho da saída",
+    idea: "Percorre a árvore de decisões. A complexidade alta é aceitável porque a própria saída é exponencial; a arte está em podar cedo.",
+    sig: ["todas as combinações/permutações", "todos os subconjuntos", "n pequeno (≤ 20)", "posicionar rainhas", "a palavra existe no grid?"],
+    tpl: `var res = new List<IList<int>>();
+var path = new List<int>();
+void Bt(int start) {
+    res.Add(new List<int>(path));          // subsets: todo nó é resposta
+    for (int i = start; i < nums.Length; i++) {
+        path.Add(nums[i]);                 // escolhe
+        Bt(i + 1);                         // explora
+        path.RemoveAt(path.Count - 1);     // desfaz
+    }
+}
+Bt(0);`,
+    cl: [lc(78,"subsets","Subsets"), lc(46,"permutations","Permutations"), lc(39,"combination-sum","Combination Sum"), lc(17,"letter-combinations-of-a-phone-number","Letter Combinations of a Phone Number"), lc(79,"word-search","Word Search"), lc(51,"n-queens","N-Queens")],
+    trap: "res.Add(path) guarda a referência: copie a lista. Para entrada com duplicados, ordene e pule nums[i] == nums[i−1] no mesmo nível." },
+  dp1: { name: "Programação dinâmica 1D (DP)", ds: "dp[i] (ou duas variáveis)", op: "dp[i] a partir de dp[i−1], dp[i−2]…", cx: "O(n) · O(1) a O(n)",
+    idea: "Escreva em português o que dp[i] significa antes do código. A recorrência sai da última escolha: o que eu fiz na posição i?",
+    sig: ["número de formas de chegar", "máximo sem pegar adjacentes", "decodificar", "quebrar string em palavras", "maior subsequência crescente"],
+    tpl: `int prev2 = 0, prev1 = 0;               // dp[i-2], dp[i-1]
+foreach (var x in nums) {
+    int cur = Math.Max(prev1, prev2 + x);   // pula ou pega
+    prev2 = prev1;
+    prev1 = cur;
+}
+return prev1;`,
+    cl: [lc(70,"climbing-stairs","Climbing Stairs"), lc(198,"house-robber","House Robber"), lc(91,"decode-ways","Decode Ways"), lc(139,"word-break","Word Break"), lc(300,"longest-increasing-subsequence","Longest Increasing Subsequence")],
+    trap: "LIS em O(n²) é programação dinâmica clássica; em O(n log n) usa binary search sobre a lista dos menores finais possíveis." },
+  dp2: { name: "Programação dinâmica 2D, duas sequências (DP)", ds: "Tabela (m+1) × (n+1)", op: "Comparar a[i−1] com b[j−1]", cx: "O(m·n)",
+    idea: "dp[i, j] responde o problema para os prefixos a[..i) e b[..j). A linha e a coluna 0 são a string vazia: o caso base.",
+    sig: ["duas strings", "subsequência comum", "mínimo de operações para transformar", "casar padrão com * e ."],
+    tpl: `var dp = new int[a.Length + 1, b.Length + 1];
+for (int i = 1; i <= a.Length; i++)
+    for (int j = 1; j <= b.Length; j++)
+        dp[i, j] = a[i - 1] == b[j - 1]
+            ? dp[i - 1, j - 1] + 1
+            : Math.Max(dp[i - 1, j], dp[i, j - 1]);
+return dp[a.Length, b.Length];`,
+    cl: [lc(1143,"longest-common-subsequence","Longest Common Subsequence"), lc(72,"edit-distance","Edit Distance"), lc(97,"interleaving-string","Interleaving String"), lc(115,"distinct-subsequences","Distinct Subsequences"), lc(10,"regular-expression-matching","Regular Expression Matching")],
+    trap: "Off-by-one: com tabela (m+1) × (n+1), o caractere de dp[i, j] é a[i−1]." },
+  knap: { name: "Knapsack", ds: "dp[capacidade]", op: "Para cada item, para cada capacidade", cx: "O(n · alvo)",
+    idea: "O estado é \"quanto ainda cabe\". Item ilimitado (moedas) percorre a capacidade crescendo; item de uso único percorre decrescendo.",
+    sig: ["atingir soma alvo", "moedas", "dividir em dois subconjuntos iguais", "atribuir + e −"],
+    tpl: `var dp = new int[amount + 1];
+Array.Fill(dp, int.MaxValue);
+dp[0] = 0;
+for (int s = 1; s <= amount; s++)
+    foreach (var c in coins)
+        if (c <= s && dp[s - c] != int.MaxValue)
+            dp[s] = Math.Min(dp[s], dp[s - c] + 1);
+return dp[amount] == int.MaxValue ? -1 : dp[amount];`,
+    cl: [lc(322,"coin-change","Coin Change"), lc(518,"coin-change-ii","Coin Change II"), lc(416,"partition-equal-subset-sum","Partition Equal Subset Sum"), lc(494,"target-sum","Target Sum"), lc(474,"ones-and-zeroes","Ones and Zeroes")],
+    trap: "Coin Change II (contar combinações): loop externo nas moedas, interno na soma. Invertido, você conta permutações." },
+  dpgrid: { name: "Programação dinâmica em grid (DP)", ds: "dp[m, n] (ou uma linha)", op: "dp[i, j] a partir de cima e da esquerda", cx: "O(m·n)",
+    idea: "Como só se anda para a direita e para baixo, cada célula depende de células já calculadas. Com 4 direções vira grafo (BFS/Dijkstra), não DP.",
+    sig: ["só direita e baixo", "número de caminhos", "menor soma de caminho", "maior quadrado de 1s"],
+    tpl: `var dp = new int[m, n];
+for (int i = 0; i < m; i++)
+    for (int j = 0; j < n; j++)
+        dp[i, j] = (i == 0 || j == 0) ? 1 : dp[i - 1, j] + dp[i, j - 1];
+return dp[m - 1, n - 1];`,
+    cl: [lc(62,"unique-paths","Unique Paths"), lc(63,"unique-paths-ii","Unique Paths II"), lc(64,"minimum-path-sum","Minimum Path Sum"), lc(120,"triangle","Triangle"), lc(221,"maximal-square","Maximal Square")],
+    trap: "Um obstáculo na primeira linha ou coluna bloqueia tudo depois dele, não só a própria célula." },
+  dpint: { name: "Programação dinâmica intervalar (DP)", ds: "dp[i, j] sobre trechos", op: "Combinar trechos menores, do curto para o longo", cx: "O(n²) a O(n³)",
+    idea: "A resposta de [i..j] vem de trechos internos, então a ordem do loop precisa calcular trechos curtos antes: i decrescendo e j crescendo, ou por comprimento.",
+    sig: ["palíndromo", "cortar/estourar com custo dos vizinhos", "n ≤ 500"],
+    tpl: `var dp = new int[n, n];                  // dp[i,j] = LPS em s[i..j]
+for (int i = n - 1; i >= 0; i--) {
+    dp[i, i] = 1;
+    for (int j = i + 1; j < n; j++)
+        dp[i, j] = s[i] == s[j]
+            ? dp[i + 1, j - 1] + 2
+            : Math.Max(dp[i + 1, j], dp[i, j - 1]);
+}
+return dp[0, n - 1];`,
+    cl: [lc(647,"palindromic-substrings","Palindromic Substrings"), lc(5,"longest-palindromic-substring","Longest Palindromic Substring"), lc(516,"longest-palindromic-subsequence","Longest Palindromic Subsequence"), lc(1547,"minimum-cost-to-cut-a-stick","Minimum Cost to Cut a Stick"), lc(312,"burst-balloons","Burst Balloons")],
+    trap: "Longest Palindromic Substring sai mais simples expandindo a partir do centro: O(n²) tempo e O(1) espaço." },
+  greedy: { name: "Greedy", ds: "Variáveis de melhor-até-agora, às vezes um sort", op: "Uma decisão local por passo, nunca desfeita", cx: "O(n) ou O(n log n)",
+    idea: "Só vale se dá pra argumentar que a escolha local nunca piora o ótimo (argumento de troca). Antes de confiar, procure um contraexemplo pequeno.",
+    sig: ["consegue chegar ao fim?", "menor número de saltos", "circuito de postos", "particionar em pedaços"],
+    tpl: `int reach = 0;
+for (int i = 0; i < nums.Length; i++) {
+    if (i > reach) return false;              // nem chegamos aqui
+    reach = Math.Max(reach, i + nums[i]);     // melhor alcance até agora
+}
+return true;`,
+    cl: [lc(55,"jump-game","Jump Game"), lc(45,"jump-game-ii","Jump Game II"), lc(763,"partition-labels","Partition Labels"), lc(134,"gas-station","Gas Station"), lc(621,"task-scheduler","Task Scheduler")],
+    trap: "Achou um contraexemplo para o guloso? O problema provavelmente é programação dinâmica." },
+  fastslow: { name: "Ponteiros rápido e lento (fast & slow)", ds: "Dois ponteiros", op: "Um anda 1, o outro anda 2", cx: "O(n) · O(1)",
+    idea: "Num ciclo, o rápido alcança o lento. Sem ciclo, quando o rápido chega ao fim o lento está no meio.",
+    sig: ["ciclo", "meio da lista", "n-ésimo a partir do fim", "O(1) de espaço"],
+    tpl: `ListNode slow = head, fast = head;
+while (fast != null && fast.next != null) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow == fast) return true;   // ciclo
+}
+return false;   // sem ciclo: slow parou no meio`,
+    cl: [lc(876,"middle-of-the-linked-list","Middle of the Linked List"), lc(141,"linked-list-cycle","Linked List Cycle"), lc(19,"remove-nth-node-from-end-of-list","Remove Nth Node From End of List"), lc(142,"linked-list-cycle-ii","Linked List Cycle II"), lc(287,"find-the-duplicate-number","Find the Duplicate Number")],
+    trap: "Entrada do ciclo: depois do encontro, volte um ponteiro para a cabeça e ande os dois de 1 em 1. Onde se encontrarem é a entrada." },
+  reverse: { name: "Reversão in-place", ds: "Ponteiros prev / cur / next", op: "Virar cur.next para trás", cx: "O(n) · O(1)",
+    idea: "Salve next antes de sobrescrever cur.next: é o único jeito de não perder o resto da lista.",
+    sig: ["reverter", "reverter entre left e right", "em grupos de k", "reordenar L0 → Ln → L1"],
+    tpl: `ListNode prev = null, cur = head;
+while (cur != null) {
+    var next = cur.next;
+    cur.next = prev;
+    prev = cur;
+    cur = next;
+}
+return prev;`,
+    cl: [lc(206,"reverse-linked-list","Reverse Linked List"), lc(234,"palindrome-linked-list","Palindrome Linked List"), lc(92,"reverse-linked-list-ii","Reverse Linked List II"), lc(143,"reorder-list","Reorder List"), lc(25,"reverse-nodes-in-k-group","Reverse Nodes in k-Group")],
+    trap: "Reorder List = achar o meio (fast & slow) + reverter a segunda metade + intercalar. Três padrões num problema só." },
+  dummy: { name: "Nó dummy", ds: "Nó sentinela + tail", op: "Anexar em tail, devolver dummy.next", cx: "O(n) · O(1)",
+    idea: "Elimina o caso especial \"a cabeça mudou\". Toda operação vira anexar ao fim.",
+    sig: ["juntar duas listas", "remover nós com valor x", "particionar em torno de x", "somar números em listas"],
+    tpl: `var dummy = new ListNode(0);
+var tail = dummy;
+while (a != null && b != null) {
+    if (a.val <= b.val) { tail.next = a; a = a.next; }
+    else                { tail.next = b; b = b.next; }
+    tail = tail.next;
+}
+tail.next = a ?? b;
+return dummy.next;`,
+    cl: [lc(21,"merge-two-sorted-lists","Merge Two Sorted Lists"), lc(203,"remove-linked-list-elements","Remove Linked List Elements"), lc(2,"add-two-numbers","Add Two Numbers"), lc(86,"partition-list","Partition List"), lc(82,"remove-duplicates-from-sorted-list-ii","Remove Duplicates from Sorted List II")],
+    trap: "Ao particionar em duas listas, termine a última com null; senão você cria um ciclo." },
+  bfstree: { name: "BFS por nível", ds: "Queue<TreeNode>", op: "Processar q.Count nós por rodada", cx: "O(n) · O(largura)",
+    idea: "Congelar o tamanho da fila no começo de cada rodada separa os níveis sem guardar a profundidade de cada nó.",
+    sig: ["por nível", "visão da direita", "zigue-zague", "menor profundidade", "média por nível"],
+    tpl: `var q = new Queue<TreeNode>();
+if (root != null) q.Enqueue(root);
+while (q.Count > 0) {
+    int size = q.Count;                // congela o nível atual
+    for (int i = 0; i < size; i++) {
+        var node = q.Dequeue();
+        // processa node neste nível
+        if (node.left != null) q.Enqueue(node.left);
+        if (node.right != null) q.Enqueue(node.right);
+    }
+}`,
+    cl: [lc(102,"binary-tree-level-order-traversal","Binary Tree Level Order Traversal"), lc(637,"average-of-levels-in-binary-tree","Average of Levels in Binary Tree"), lc(199,"binary-tree-right-side-view","Binary Tree Right Side View"), lc(111,"minimum-depth-of-binary-tree","Minimum Depth of Binary Tree"), lc(103,"binary-tree-zigzag-level-order-traversal","Binary Tree Zigzag Level Order Traversal")],
+    trap: "Menor profundidade com DFS precisa tratar o nó com um filho só: ele não é folha. Com BFS, pare na primeira folha." },
+  inorder: { name: "In-order em BST", ds: "Pilha (iterativo) ou recursão", op: "Esquerda, nó, direita", cx: "O(h + k)",
+    idea: "O in-order de uma BST produz os valores em ordem crescente. Validar BST vira \"a sequência é estritamente crescente?\"",
+    sig: ["BST", "k-ésimo menor", "validar BST", "soma num intervalo [lo, hi]", "iterador"],
+    tpl: `var st = new Stack<TreeNode>();
+var cur = root;
+while (cur != null || st.Count > 0) {
+    while (cur != null) { st.Push(cur); cur = cur.left; }
+    cur = st.Pop();
+    if (--k == 0) return cur.val;   // in-order em BST = ordem crescente
+    cur = cur.right;
+}`,
+    cl: [lc(938,"range-sum-of-bst","Range Sum of BST"), lc(230,"kth-smallest-element-in-a-bst","Kth Smallest Element in a BST"), lc(98,"validate-binary-search-tree","Validate Binary Search Tree"), lc(235,"lowest-common-ancestor-of-a-binary-search-tree","LCA of a Binary Search Tree"), lc(173,"binary-search-tree-iterator","Binary Search Tree Iterator")],
+    trap: "Validar comparando só com os filhos diretos está errado: o nó precisa respeitar limites herdados (min, max) de todos os ancestrais." },
+  postorder: { name: "DFS pós-ordem", ds: "Recursão que retorna valor", op: "Combinar as respostas dos filhos no pai", cx: "O(n) · O(h)",
+    idea: "A função retorna o que o pai precisa (ex.: altura). A resposta global (diâmetro, max path) é atualizada numa variável de fora.",
+    sig: ["altura/profundidade", "diâmetro", "balanceada", "ancestral comum", "caminho máximo entre quaisquer nós"],
+    tpl: `int best = int.MinValue;
+int Gain(TreeNode n) {
+    if (n == null) return 0;
+    int l = Math.Max(0, Gain(n.left));      // filhos respondem primeiro
+    int r = Math.Max(0, Gain(n.right));
+    best = Math.Max(best, n.val + l + r);   // caminho que passa por n
+    return n.val + Math.Max(l, r);          // o que o pai pode usar
+}`,
+    cl: [lc(104,"maximum-depth-of-binary-tree","Maximum Depth of Binary Tree"), lc(110,"balanced-binary-tree","Balanced Binary Tree"), lc(543,"diameter-of-binary-tree","Diameter of Binary Tree"), lc(236,"lowest-common-ancestor-of-a-binary-tree","LCA of a Binary Tree"), lc(124,"binary-tree-maximum-path-sum","Binary Tree Maximum Path Sum")],
+    trap: "Separe o que você retorna ao pai do que atualiza na resposta global: no max path sum o pai só pode usar um dos lados." },
+  preorder: { name: "DFS pré-ordem", ds: "Recursão com estado acumulado", op: "Passar o estado aos filhos; desfazer ao voltar", cx: "O(n) · O(h)",
+    idea: "Informação da raiz até o nó (soma, máximo no caminho, número formado) desce como parâmetro.",
+    sig: ["raiz até folha", "soma do caminho", "nó \"bom\" (ninguém maior acima)", "números formados pelo caminho"],
+    tpl: `void Dfs(TreeNode n, int remaining, List<int> path) {
+    if (n == null) return;
+    path.Add(n.val);
+    remaining -= n.val;
+    if (n.left == null && n.right == null && remaining == 0)
+        res.Add(new List<int>(path));
+    Dfs(n.left, remaining, path);
+    Dfs(n.right, remaining, path);
+    path.RemoveAt(path.Count - 1);   // desfaz ao voltar
+}`,
+    cl: [lc(112,"path-sum","Path Sum"), lc(129,"sum-root-to-leaf-numbers","Sum Root to Leaf Numbers"), lc(1448,"count-good-nodes-in-binary-tree","Count Good Nodes in Binary Tree"), lc(113,"path-sum-ii","Path Sum II"), lc(437,"path-sum-iii","Path Sum III")],
+    trap: "Path Sum III (o caminho começa em qualquer nó) junta este padrão com prefix sum + hashmap." },
+  bfs: { name: "BFS (menor caminho sem peso)", ds: "Queue + visitados", op: "Expandir em camadas", cx: "O(V + E)",
+    idea: "BFS visita os nós em ordem de distância. A primeira vez que alcança o destino é pelo menor número de passos.",
+    sig: ["menor número de passos", "grid com 4 ou 8 direções", "trocar uma letra por vez", "estados (cadeado, tabuleiro)"],
+    tpl: `var dist = new int[m, n];           // preencha com -1
+var q = new Queue<(int r, int c)>();
+q.Enqueue(start); dist[start.r, start.c] = 0;
+while (q.Count > 0) {
+    var (r, c) = q.Dequeue();
+    foreach (var (dr, dc) in dirs) {
+        int nr = r + dr, nc = c + dc;
+        if (Dentro(nr, nc) && Livre(nr, nc) && dist[nr, nc] == -1) {
+            dist[nr, nc] = dist[r, c] + 1;   // marca ao enfileirar
+            q.Enqueue((nr, nc));
+        }
+    }
+}`,
+    cl: [lc(1926,"nearest-exit-from-entrance-in-maze","Nearest Exit from Entrance in Maze"), lc(1091,"shortest-path-in-binary-matrix","Shortest Path in Binary Matrix"), lc(752,"open-the-lock","Open the Lock"), lc(909,"snakes-and-ladders","Snakes and Ladders"), lc(127,"word-ladder","Word Ladder")],
+    trap: "Marque visitado ao enfileirar, não ao desenfileirar; senão o mesmo nó entra na fila várias vezes." },
+  msbfs: { name: "BFS multi-origem", ds: "Queue iniciada com todas as fontes", op: "Expandir todas as fontes juntas, por rodada", cx: "O(m·n)",
+    idea: "É um BFS a partir de uma super-origem ligada a todas as fontes. Cada célula recebe a distância até a fonte mais próxima.",
+    sig: ["tudo apodrece/espalha ao mesmo tempo", "distância até o 0 mais próximo", "o mais longe possível da terra"],
+    tpl: `var q = new Queue<(int r, int c)>();
+for (int r = 0; r < m; r++)
+    for (int c = 0; c < n; c++)
+        if (grid[r][c] == 2) q.Enqueue((r, c));   // todas as fontes no tempo 0
+int minutes = 0;
+while (q.Count > 0) {
+    bool spread = false;
+    for (int s = q.Count; s > 0; s--) {
+        var (r, c) = q.Dequeue();
+        foreach (var (dr, dc) in dirs) {
+            int nr = r + dr, nc = c + dc;
+            if (Dentro(nr, nc) && grid[nr][nc] == 1) {
+                grid[nr][nc] = 2; spread = true;
+                q.Enqueue((nr, nc));
+            }
+        }
+    }
+    if (spread) minutes++;
+}`,
+    cl: [lc(994,"rotting-oranges","Rotting Oranges"), lc(542,"01-matrix","01 Matrix"), lc(1162,"as-far-from-land-as-possible","As Far from Land as Possible"), lc(286,"walls-and-gates","Walls and Gates",1)],
+    trap: "Rodar um BFS separado a partir de cada fonte vira O((m·n)²)." },
+  dijkstra: { name: "Dijkstra", ds: "PriorityQueue + dist[]", op: "Relaxar arestas a partir do mais próximo", cx: "O((V + E) log V)",
+    idea: "Com pesos não negativos, o nó de menor distância provisória na heap já está definitivo.",
+    sig: ["tempo/custo mínimo com pesos", "minimizar o maior esforço do caminho", "probabilidade máxima"],
+    tpl: `var dist = Enumerable.Repeat(int.MaxValue, n).ToArray();
+var pq = new PriorityQueue<int, int>();      // nó, distância
+dist[src] = 0; pq.Enqueue(src, 0);
+while (pq.TryDequeue(out var u, out var d)) {
+    if (d > dist[u]) continue;                // entrada velha
+    foreach (var (v, w) in adj[u])
+        if (d + w < dist[v]) {
+            dist[v] = d + w;
+            pq.Enqueue(v, dist[v]);
+        }
+}`,
+    cl: [lc(743,"network-delay-time","Network Delay Time"), lc(1514,"path-with-maximum-probability","Path with Maximum Probability"), lc(1631,"path-with-minimum-effort","Path With Minimum Effort"), lc(778,"swim-in-rising-water","Swim in Rising Water"), lc(787,"cheapest-flights-within-k-stops","Cheapest Flights Within K Stops")],
+    trap: "Pesos negativos quebram Dijkstra. Limite de K paradas (787) pede Bellman-Ford ou BFS por nível." },
+  topo: { name: "Ordenação topológica (Kahn)", ds: "Grau de entrada + Queue", op: "Liberar quem chega a grau 0", cx: "O(V + E)",
+    idea: "Um nó pode sair quando nada mais o bloqueia. Se sobram nós no fim, eles estão num ciclo.",
+    sig: ["pré-requisitos", "ordem de tarefas/cursos", "dependências", "ciclo em grafo dirigido"],
+    tpl: `var indeg = new int[n];
+foreach (var (a, b) in edges) { adj[a].Add(b); indeg[b]++; }   // a antes de b
+var q = new Queue<int>(Enumerable.Range(0, n).Where(i => indeg[i] == 0));
+var order = new List<int>();
+while (q.Count > 0) {
+    int u = q.Dequeue(); order.Add(u);
+    foreach (var v in adj[u])
+        if (--indeg[v] == 0) q.Enqueue(v);
+}
+return order.Count == n ? order : null;   // < n → ciclo`,
+    cl: [lc(207,"course-schedule","Course Schedule"), lc(210,"course-schedule-ii","Course Schedule II"), lc(2115,"find-all-possible-recipes-from-given-supplies","Find All Possible Recipes from Given Supplies"), lc(310,"minimum-height-trees","Minimum Height Trees"), lc(269,"alien-dictionary","Alien Dictionary",1)],
+    trap: "Em Course Schedule, [a, b] significa b antes de a: a aresta é b → a." },
+  flood: { name: "DFS/BFS flood fill", ds: "Grid + visitados (ou marcar in-place)", op: "A cada célula nova, inundar a região inteira", cx: "O(m·n)",
+    idea: "Cada região é contada uma vez: ao achar uma célula ainda não visitada, a inundação marca a região toda.",
+    sig: ["número de ilhas", "maior área", "pintar região", "regiões cercadas", "clonar grafo"],
+    tpl: `void Dfs(int r, int c) {
+    if (r < 0 || c < 0 || r >= m || c >= n || grid[r][c] != '1') return;
+    grid[r][c] = '0';                           // marca visitado
+    foreach (var (dr, dc) in dirs) Dfs(r + dr, c + dc);
+}
+int islands = 0;
+for (int r = 0; r < m; r++)
+    for (int c = 0; c < n; c++)
+        if (grid[r][c] == '1') { islands++; Dfs(r, c); }`,
+    cl: [lc(733,"flood-fill","Flood Fill"), lc(200,"number-of-islands","Number of Islands"), lc(695,"max-area-of-island","Max Area of Island"), lc(133,"clone-graph","Clone Graph"), lc(130,"surrounded-regions","Surrounded Regions")],
+    trap: "Regiões cercadas: inunde a partir da borda o que NÃO deve ser capturado, depois vire o resto." },
+  uf: { name: "Union-Find (DSU)", ds: "parent[] + rank[]", op: "Find com compressão de caminho, Union por rank", cx: "≈ O(α(n)) por operação",
+    idea: "Mantém grupos que só se juntam. Union retornar false é o sinal de ciclo / aresta redundante.",
+    sig: ["estão no mesmo grupo?", "aresta redundante", "mesclar contas", "conectar tudo com custo mínimo"],
+    tpl: `int[] parent = Enumerable.Range(0, n).ToArray();
+int[] rank = new int[n];
+int Find(int x) => parent[x] == x ? x : (parent[x] = Find(parent[x]));
+bool Union(int a, int b) {
+    int ra = Find(a), rb = Find(b);
+    if (ra == rb) return false;           // já conectados
+    if (rank[ra] < rank[rb]) (ra, rb) = (rb, ra);
+    parent[rb] = ra;
+    if (rank[ra] == rank[rb]) rank[ra]++;
+    return true;
+}`,
+    cl: [lc(547,"number-of-provinces","Number of Provinces"), lc(684,"redundant-connection","Redundant Connection"), lc(990,"satisfiability-of-equality-equations","Satisfiability of Equality Equations"), lc(721,"accounts-merge","Accounts Merge"), lc(1584,"min-cost-to-connect-all-points","Min Cost to Connect All Points")],
+    trap: "Sem compressão de caminho o Find degrada para O(n)." },
+  merge: { name: "Ordenar por início + varrer", ds: "Lista de resultado", op: "Sobrepõe? estende o fim; senão, abre novo", cx: "O(n log n)",
+    idea: "Depois de ordenar por início, um intervalo só pode sobrepor o último que você guardou.",
+    sig: ["mesclar sobrepostos", "inserir intervalo", "interseção de duas listas"],
+    tpl: `Array.Sort(iv, (a, b) => a[0].CompareTo(b[0]));   // por início
+var res = new List<int[]>();
+foreach (var cur in iv) {
+    if (res.Count > 0 && res[^1][1] >= cur[0])
+        res[^1][1] = Math.Max(res[^1][1], cur[1]);  // sobrepõe: estende
+    else res.Add(cur);
+}
+return res.ToArray();`,
+    cl: [lc(56,"merge-intervals","Merge Intervals"), lc(57,"insert-interval","Insert Interval"), lc(986,"interval-list-intersections","Interval List Intersections")],
+    trap: "Decida se [1,2] e [2,3] se tocam (>= ou >). O enunciado manda." },
+  rooms: { name: "Min-heap de fins (sweep)", ds: "PriorityQueue com os fins ativos", op: "Liberar sala se o fim mais cedo ≤ início atual", cx: "O(n log n)",
+    idea: "O tamanho da heap é o número de intervalos ativos no instante atual. O máximo ao longo da varredura é a resposta.",
+    sig: ["número mínimo de salas", "a capacidade é excedida em algum momento?", "grupos sem sobreposição"],
+    tpl: `Array.Sort(iv, (a, b) => a[0].CompareTo(b[0]));
+var ends = new PriorityQueue<int, int>();   // fins das salas ocupadas
+foreach (var m in iv) {
+    if (ends.Count > 0 && ends.Peek() <= m[0]) ends.Dequeue();   // reaproveita
+    ends.Enqueue(m[1], m[1]);
+}
+return ends.Count;`,
+    cl: [lc(253,"meeting-rooms-ii","Meeting Rooms II",1), lc(1094,"car-pooling","Car Pooling"), lc(2406,"divide-intervals-into-minimum-number-of-groups","Divide Intervals Into Minimum Number of Groups"), lc(731,"my-calendar-ii","My Calendar II")],
+    trap: "Alternativa com eventos (+1 no início, −1 no fim): no empate, processe o fim antes se intervalos que se tocam não conflitam." },
+  byend: { name: "Greedy ordenando por fim", ds: "Variável lastEnd", op: "Ficar com quem termina mais cedo", cx: "O(n log n)",
+    idea: "Terminar cedo deixa mais espaço para os próximos. É o clássico activity selection.",
+    sig: ["máximo de não sobrepostos", "mínimo a remover", "mínimo de flechas", "maior cadeia de pares"],
+    tpl: `Array.Sort(iv, (a, b) => a[1].CompareTo(b[1]));   // por FIM
+int kept = 0, lastEnd = int.MinValue;
+foreach (var x in iv)
+    if (x[0] >= lastEnd) { kept++; lastEnd = x[1]; }
+return iv.Length - kept;   // mínimo de remoções`,
+    cl: [lc(435,"non-overlapping-intervals","Non-overlapping Intervals"), lc(452,"minimum-number-of-arrows-to-burst-balloons","Minimum Number of Arrows to Burst Balloons"), lc(646,"maximum-length-of-pair-chain","Maximum Length of Pair Chain")],
+    trap: "Ordenar por início aqui dá resposta errada. É por fim." },
+  twoheaps: { name: "Dois heaps", ds: "Max-heap (metade baixa) + min-heap (metade alta)", op: "Rebalancear para diferença ≤ 1", cx: "O(log n) inserção · O(1) mediana",
+    idea: "Os topos das duas heaps são os dois elementos do meio.",
+    sig: ["mediana em fluxo", "mediana em janela", "melhor projeto disponível com capital crescente"],
+    tpl: `var low  = new PriorityQueue<int, int>();   // max-heap (prioridade = -x)
+var high = new PriorityQueue<int, int>();   // min-heap
+void Add(int x) {
+    low.Enqueue(x, -x);
+    var y = low.Dequeue(); high.Enqueue(y, y);          // maior do low sobe
+    if (high.Count > low.Count) { var z = high.Dequeue(); low.Enqueue(z, -z); }
+}
+double Median() => low.Count > high.Count
+    ? low.Peek()
+    : (low.Peek() + (double)high.Peek()) / 2;`,
+    cl: [lc(295,"find-median-from-data-stream","Find Median from Data Stream"), lc(502,"ipo","IPO"), lc(480,"sliding-window-median","Sliding Window Median")],
+    trap: "A PriorityQueue do .NET é min-heap. Para max-heap use prioridade negativa ou Comparer<int>.Create((a, b) => b.CompareTo(a))." },
+  lru: { name: "Hash map + lista duplamente ligada", ds: "Dictionary<key, LinkedListNode> + LinkedList", op: "Mover para a frente ao acessar; expulsar do fim", cx: "O(1) por operação",
+    idea: "O hash dá acesso O(1) ao nó; a lista mantém a ordem de uso com remoção O(1) no meio.",
+    sig: ["get/put em O(1)", "capacidade fixa", "menos recentemente usado"],
+    tpl: `var map = new Dictionary<int, LinkedListNode<(int key, int val)>>();
+var list = new LinkedList<(int key, int val)>();   // frente = mais recente
+int Get(int key) {
+    if (!map.TryGetValue(key, out var node)) return -1;
+    list.Remove(node); list.AddFirst(node);
+    return node.Value.val;
+}
+void Put(int key, int val) {
+    if (map.TryGetValue(key, out var node)) list.Remove(node);
+    else if (map.Count == cap) { map.Remove(list.Last.Value.key); list.RemoveLast(); }
+    map[key] = list.AddFirst((key, val));
+}`,
+    cl: [lc(146,"lru-cache","LRU Cache"), lc(460,"lfu-cache","LFU Cache"), lc(432,"all-oone-data-structure","All O`one Data Structure")],
+    trap: "Ao expulsar, remova a chave do dicionário também. É por isso que o nó guarda a chave." },
+  minstack: { name: "Pilha com estado auxiliar", ds: "Stack<(valor, mínimo)>", op: "Cada entrada guarda o mínimo até ela", cx: "O(1)",
+    idea: "O mínimo só muda quando você empilha ou desempilha, então dá pra guardá-lo junto de cada nível.",
+    sig: ["getMin em O(1)", "fila com duas pilhas"],
+    tpl: `var st = new Stack<(int val, int min)>();
+void Push(int x) => st.Push((x, st.Count == 0 ? x : Math.Min(x, st.Peek().min)));
+void Pop() => st.Pop();
+int Top() => st.Peek().val;
+int GetMin() => st.Peek().min;`,
+    cl: [lc(155,"min-stack","Min Stack"), lc(232,"implement-queue-using-stacks","Implement Queue using Stacks"), lc(716,"max-stack","Max Stack",1)],
+    trap: "Fila com duas pilhas: só transfira de in para out quando out estiver vazia. Assim fica O(1) amortizado." },
+  fenwick: { name: "Fenwick tree (BIT)", ds: "int[n + 1]", op: "i += i & −i para atualizar; i −= i & −i para consultar", cx: "O(log n) por operação",
+    idea: "Cada posição guarda a soma de um bloco cujo tamanho é o bit mais baixo de i. É prefix sum com update em O(log n).",
+    sig: ["updates e somas de range intercalados", "contar menores à direita", "pares invertidos"],
+    tpl: `int[] bit = new int[n + 1];                     // 1-indexado
+void Update(int i, int delta) { for (i++; i <= n; i += i & -i) bit[i] += delta; }
+int Query(int i) { int s = 0; for (i++; i > 0; i -= i & -i) s += bit[i]; return s; }  // soma [0..i]
+int Range(int l, int r) => Query(r) - (l > 0 ? Query(l - 1) : 0);`,
+    cl: [lc(303,"range-sum-query-immutable","Range Sum Query - Immutable"), lc(307,"range-sum-query-mutable","Range Sum Query - Mutable"), lc(315,"count-of-smaller-numbers-after-self","Count of Smaller Numbers After Self"), lc(493,"reverse-pairs","Reverse Pairs")],
+    trap: "Sem updates, prefix sum simples resolve (303). Com valores grandes, comprima as coordenadas antes." },
+  bsanswer: { name: "Binary search na resposta", ds: "Intervalo [lo, hi] de respostas", op: "Testar se mid é viável", cx: "O(n · log(intervalo))",
+    idea: "Você não sabe calcular a resposta, mas sabe verificar se um X serve. Se \"X serve\" é monotônico, busque o menor X que serve.",
+    sig: ["menor/maior valor possível", "minimizar o máximo", "em no máximo D dias / H horas", "capacidade, velocidade"],
+    tpl: `int lo = MenorPossivel, hi = MaiorPossivel;
+while (lo < hi) {
+    int mid = lo + (hi - lo) / 2;
+    if (Viavel(mid)) hi = mid;    // serve: tenta menor
+    else lo = mid + 1;
+}
+return lo;
+// Viavel(x) é O(n) e monotônica: se x serve, x + 1 também serve`,
+    cl: [lc(69,"sqrtx","Sqrt(x)"), lc(875,"koko-eating-bananas","Koko Eating Bananas"), lc(1011,"capacity-to-ship-packages-within-d-days","Capacity To Ship Packages Within D Days"), lc(1482,"minimum-number-of-days-to-make-m-bouquets","Minimum Number of Days to Make m Bouquets"), lc(410,"split-array-largest-sum","Split Array Largest Sum")],
+    trap: "lo e hi precisam ser respostas extremas válidas (ex.: lo = max(pesos), hi = soma(pesos)); senão a viabilidade quebra nas pontas." },
+  bits: { name: "Manipulação de bits", ds: "int / uint", op: "XOR, AND, shifts", cx: "O(n), ou O(1) por número",
+    idea: "XOR cancela pares (a ^ a = 0), então sobra o único. n & (n − 1) apaga o bit 1 mais baixo.",
+    sig: ["aparece uma vez, os outros duas", "sem espaço extra", "contar bits 1", "sem usar + ou −"],
+    tpl: `int x = 0;
+foreach (var v in nums) x ^= v;   // a ^ a = 0, a ^ 0 = a
+return x;
+// n & (n - 1) apaga o 1 mais baixo; n & -n isola esse bit`,
+    cl: [lc(136,"single-number","Single Number"), lc(191,"number-of-1-bits","Number of 1 Bits"), lc(338,"counting-bits","Counting Bits"), lc(190,"reverse-bits","Reverse Bits"), lc(371,"sum-of-two-integers","Sum of Two Integers")],
+    trap: "Em C#, shift à direita de int negativo preserva o sinal. Use uint ou >>> para shift lógico." },
+};
+
+/* O que separa as opções de cada pergunta: a propriedade do enunciado que decide o ramo. */
+const D = {
+  root: "A forma do input define a família de estruturas. Quando há mais de uma leitura (um grid também é um grafo), escolha pela pergunta que o enunciado faz.",
+  arr: "Separe primeiro o tipo de saída: todas as soluções (backtracking), um ótimo ou uma contagem em que as escolhas interagem (programação dinâmica), ou uma consulta sobre trechos, pares ou elementos.",
+  contig: "A validade do trecho é monotônica (crescer só piora)? Janela. Igualdade exata ou números negativos? Prefix sum. Só o maior valor, sem restrição? Kadane. Um extremo por janela de tamanho fixo? Deque.",
+  pair: "Com um alvo exato, o par certo é um valor que você pode procurar. Sem alvo, procurando o melhor par por uma fórmula, não há o que procurar: é preciso uma ordem que descarte muitos pares a cada comparação, e quando a fórmula usa as posições, as próprias posições são essa ordem.",
+  pairtgt: "A posição original importa? Se só os valores contam, ordenar libera dois ponteiros. Se os índices contam, um hash guarda o que já passou.",
+  dp: "O estado é o mínimo que você precisa saber para decidir o resto: uma posição, duas posições, uma capacidade, uma célula ou um trecho. Se nenhuma escolha precisa ser desfeita, não é programação dinâmica.",
+  ll: "Ponteiros em velocidades diferentes medem a lista; ponteiros invertidos a reconstroem; um nó sentinela elimina o caso especial da cabeça.",
+  tree: "Para onde a informação flui? De cima para baixo (pré-ordem), de baixo para cima (pós-ordem), em ordem crescente numa BST (in-order) ou em camadas (BFS).",
+  graph: "Arestas sem peso pedem BFS; pesos não negativos, Dijkstra; dependências, ordem topológica; regiões, percorrer ou unir componentes.",
+  src: "Várias fontes ao mesmo tempo viram uma única fila que começa com todas elas.",
+  comp: "Grafo pronto de uma vez: percorra. Conexões chegando com perguntas no meio: union-find.",
+  iv: "Ordenar por início junta o que se sobrepõe; ordenar por fim maximiza o que cabe; um heap de fins mede quantos estão ativos ao mesmo tempo.",
+  design: "Qual operação domina as chamadas? A estrutura existe para deixar exatamente essa operação barata.",
+  ans: "Se você sabe testar uma resposta mas não calculá-la, busque-a. Se a melhor escolha local nunca precisa ser desfeita, siga-a. Se o enunciado fala de bits, use as identidades do XOR.",
+};
+
+/* Fronteiras: para cada padrão, os vizinhos que mais se confundem com ele.
+   v: "fail" = não serve nesses problemas; "alt" = também funciona, com outro custo; "see" = parente próximo.
+   Todo contraexemplo (cx) é verificado por .coach/verify_bounds.py. */
+const F = {
+  window: [
+    { k: "prefix", v: "alt", why: "Com todos os números positivos, os prefixos são crescentes, então buscar o prefixo certo com binary search também resolve, em O(n log n). A janela faz o mesmo em O(n) e O(1) de espaço.", flip: "há negativos, ou a pergunta é contar trechos com soma exata" },
+    { k: "deque", v: "see", why: "A janela decide quando encolher, mas não sabe o máximo do trecho depois que um elemento sai. Quando a validade depende do máximo ou do mínimo, a janela precisa de um deque monotônico ao lado.", flip: "a restrição envolve max − min do trecho" },
+    { k: "twoptr", v: "see", why: "Os dois usam dois índices, mas a janela mantém um trecho contíguo válido, enquanto dois ponteiros descartam pares graças à ordenação.", flip: "não é um trecho contíguo, e sim pares num array ordenado" },
+  ],
+  prefix: [
+    { k: "window", v: "fail", why: "A janela depende de a soma só crescer quando a janela cresce. Com negativos, encolher pode aumentar a soma, e a janela descarta trechos válidos.", flip: "todos os números são positivos e a condição é ≥ ou ≤, não igualdade exata", cx: "nums = [1, −1, 1], k = 1: a janela conta 2 trechos; a resposta é 3" },
+    { k: "complement", v: "see", why: "É o mesmo truque do Two Sum aplicado aos prefixos: para cada P[j], quantos prefixos anteriores valem P[j] − k?" },
+    { k: "kadane", v: "see", why: "Prefix sum conta ou localiza trechos com uma soma exata. Quando a pergunta é a maior soma possível, Kadane responde direto.", flip: "pede o máximo, não uma contagem" },
+  ],
+  kadane: [
+    { k: "prefix", v: "alt", why: "A maior soma terminando em j é P[j] menos o menor prefixo visto antes. Manter esse mínimo também dá O(n) e O(1): é o mesmo argumento visto pelos prefixos." },
+    { k: "window", v: "fail", why: "Não há restrição que quebre quando o trecho cresce, então a janela não tem critério para saber quando encolher." },
+    { k: "dp1", v: "see", why: "Kadane é programação dinâmica 1D cujo estado é \"a melhor soma que termina em i\", guardado em uma única variável." },
+  ],
+  deque: [
+    { k: "heap", v: "alt", why: "Um heap com remoção preguiçosa (descarta o topo enquanto ele estiver fora da janela) também dá o máximo de cada janela, em O(n log n)." },
+    { name: "Máximo corrente", v: "fail", why: "Uma variável com o maior valor visto não sabe o que fazer quando esse máximo sai da janela.", cx: "nums = [3, 1, 1], k = 2: o máximo corrente responde [3, 3]; o correto é [3, 1]" },
+  ],
+  twoptr: [
+    { k: "complement", v: "fail", why: "Ordenar perde as posições originais. Dois ponteiros encontram o par de valores, mas devolve índices do array ordenado.", flip: "pedem os índices originais, ou o input não pode ser reordenado", cx: "nums = [3, 2, 4], alvo 6: após ordenar ([2, 3, 4]), os ponteiros param nas posições 0 e 2; a resposta são os índices originais 1 e 2" },
+    { k: "binsearch", v: "alt", why: "Para cada x, buscar alvo − x por binary search também funciona no array ordenado, em O(n log n) em vez de O(n)." },
+  ],
+  complement: [
+    { k: "twoptr", v: "alt", why: "Se o array já vem ordenado, dois ponteiros resolvem em O(n) sem memória extra; o hash gasta O(n) de espaço.", flip: "input ordenado e espaço O(1) exigido" },
+    { k: "prefix", v: "see", why: "O mesmo \"já vi o que completa este?\" aplicado a somas acumuladas resolve contagem de subarrays." },
+    { name: "Maximizar uma fórmula sobre o par", v: "fail", why: "O hash procura um valor exato que completa o par. Quando o problema pede o máximo (ou o mínimo) de uma fórmula que mistura valores e posições, não existe chave para procurar: o caminho é uma ordem que permita descartar pares, como dois ponteiros vindo das pontas." },
+  ],
+  monostack: [
+    { k: "heap", v: "fail", why: "O heap responde \"qual é o maior à direita\", não \"qual é o primeiro maior à direita\". A pergunta depende da posição, não só do valor.", cx: "[1, 2, 3]: o maior à direita do 1 é 3; o próximo maior é 2" },
+    { k: "deque", v: "see", why: "O deque monotônico é a pilha monotônica com saída também pela frente, para quando os candidatos expiram por estarem fora de uma janela.", flip: "a resposta precisa ficar dentro de uma janela de tamanho k" },
+    { k: "stack", v: "see", why: "Mesma estrutura, outro invariante: aqui a pilha guarda quem ainda espera sua resposta, em ordem monotônica." },
+  ],
+  binsearch: [
+    { k: "bsanswer", v: "see", why: "Aqui você procura um valor que está no array. Na busca na resposta, o que se procura é um número que não está em lugar nenhum, testado por uma função de viabilidade.", flip: "o enunciado pede o menor/maior X que satisfaz uma condição" },
+    { k: "hash", v: "alt", why: "Um HashSet diz se o valor existe em O(1), mas gasta O(n) para montar, O(n) de espaço, e não dá posição de inserção nem primeira ocorrência.", flip: "o array não é ordenado e só importa a existência" },
+  ],
+  heap: [
+    { name: "Ordenar tudo", v: "alt", why: "Ordenar e pegar os K primeiros também funciona, em O(n log n). O heap de tamanho K custa O(n log k) e funciona com dados chegando em fluxo." },
+    { k: "twoheaps", v: "see", why: "Um heap dá um extremo. Para o elemento do meio (mediana), são dois heaps, um para cada metade.", flip: "pedem a mediana, não os K maiores" },
+    { k: "hash", v: "see", why: "Em \"K mais frequentes\", o hash conta e o heap escolhe. Nenhum dos dois resolve sozinho." },
+  ],
+  hash: [
+    { k: "cyclic", v: "alt", why: "Quando os valores estão em [1..n], o próprio array pode servir de conjunto, sem memória extra.", flip: "valores em [1..n] e espaço O(1) exigido" },
+    { name: "Ordenar e comparar vizinhos", v: "alt", why: "Duplicados e grupos iguais também aparecem lado a lado depois de ordenar: O(n log n) de tempo, O(1) de espaço extra." },
+    { k: "trie", v: "see", why: "O hash responde buscas exatas. Buscas por prefixo exigiriam percorrer todas as chaves.", flip: "as consultas são por prefixo" },
+  ],
+  stack: [
+    { name: "Contadores por tipo", v: "fail", why: "Contar aberturas e fechamentos por tipo verifica a quantidade, mas não a ordem em que eles se fecham.", cx: "\"([)]\": os contadores fecham em zero, mas a string é inválida" },
+    { k: "monostack", v: "see", why: "A mesma pilha, mas guardando quem espera um \"próximo maior\" em vez de quem espera um fechamento." },
+  ],
+  cyclic: [
+    { k: "hash", v: "alt", why: "Um HashSet resolve presença e duplicados em O(n), mas gasta O(n) de espaço." },
+    { k: "fastslow", v: "see", why: "Cyclic sort reescreve o array. Se o enunciado proíbe modificá-lo, tratar cada valor como ponteiro para um índice vira detecção de ciclo.", flip: "o array não pode ser modificado" },
+  ],
+  trie: [
+    { k: "hash", v: "alt", why: "Se as consultas são só por palavra exata, um HashSet<string> resolve com menos código.", flip: "não há consultas por prefixo nem curingas" },
+    { k: "backtrack", v: "see", why: "Buscar muitas palavras num tabuleiro é backtracking guiado pela trie: ela poda caminhos que não são prefixo de nenhuma palavra." },
+  ],
+  backtrack: [
+    { k: "dp1", v: "fail", why: "Se o enunciado pede só a contagem ou o ótimo, enumerar tudo é exponencial, e os mesmos subproblemas se repetem.", flip: "pedem uma contagem ou um ótimo, não a lista de soluções" },
+    { k: "bits", v: "alt", why: "Com n ≤ 20, iterar as máscaras de 0 a 2ⁿ − 1 gera todos os subconjuntos sem recursão." },
+  ],
+  dp1: [
+    { k: "greedy", v: "fail", why: "A escolha que parece melhor agora pode impedir uma combinação melhor depois. A programação dinâmica considera as duas possibilidades em cada passo.", cx: "quebrar \"catsand\" com as palavras {cat, cats, sand}: o guloso pega o prefixo mais longo, \"cats\", e sobra \"and\" (falso); \"cat\" + \"sand\" funciona" },
+    { k: "backtrack", v: "fail", why: "Sem memorização, a recursão recalcula os mesmos estados e vira exponencial.", flip: "pedem todas as soluções, não a contagem" },
+    { k: "kadane", v: "see", why: "Quando dp[i] só depende de dp[i − 1], o vetor inteiro vira uma ou duas variáveis." },
+  ],
+  dp2: [
+    { k: "twoptr", v: "alt", why: "Para saber só se a é subsequência de b (sim ou não), dois ponteiros gulosos bastam. A tabela é para o tamanho máximo ou o custo mínimo.", flip: "a resposta é só sim/não sobre subsequência" },
+    { k: "dpint", v: "see", why: "Duas sequências pedem dp[i, j] sobre prefixos. Um trecho [i..j] de uma mesma sequência pede programação dinâmica intervalar.", flip: "há uma sequência só e a resposta depende de trechos dela" },
+  ],
+  knap: [
+    { k: "greedy", v: "fail", why: "Pegar primeiro o item mais valioso (ou o maior) pode desperdiçar capacidade.", cx: "capacidade 10, itens (peso, valor) = (6, 6), (5, 5), (5, 5): o guloso leva 6; o ótimo é 10" },
+    { k: "backtrack", v: "alt", why: "Enumerar combinações funciona para listar todas, mas é exponencial quando só se quer contar ou otimizar.", flip: "pedem a lista das combinações" },
+    { k: "dp1", v: "see", why: "É programação dinâmica 1D em que o índice é a capacidade restante, não a posição no array." },
+  ],
+  dpgrid: [
+    { k: "greedy", v: "fail", why: "Andar sempre para a célula vizinha mais barata ignora o custo do resto do caminho.", cx: "grid [[1, 1, 5], [3, 9, 9], [1, 1, 1]]: o guloso soma 17; o menor caminho soma 7" },
+    { k: "dijkstra", v: "see", why: "Com movimento nas 4 direções, uma célula pode depender de outra ainda não calculada: vira grafo (BFS sem pesos, Dijkstra com pesos).", flip: "pode andar para cima ou para a esquerda" },
+  ],
+  dpint: [
+    { k: "dp1", v: "see", why: "Se a resposta de i só depende do prefixo até i, uma dimensão basta.", flip: "não há interação entre as duas pontas do trecho" },
+    { k: "greedy", v: "fail", why: "Em cortar ou estourar, a escolha de agora muda o custo das próximas (os vizinhos mudam), então a escolha local não tem como ser definitiva." },
+  ],
+  greedy: [
+    { k: "dp1", v: "fail", why: "Se existe um contraexemplo pequeno em que a escolha local estraga o resultado, o problema precisa considerar alternativas: programação dinâmica.", flip: "você achou um contraexemplo para a escolha local" },
+    { k: "knap", v: "fail", why: "Capacidade + itens com valor é o caso clássico em que o guloso falha (veja o contraexemplo na ficha de Knapsack)." },
+    { k: "bsanswer", v: "see", why: "Muitas vezes o guloso aparece como o teste de viabilidade dentro de uma busca binária na resposta." },
+  ],
+  fastslow: [
+    { k: "hash", v: "alt", why: "Guardar os nós visitados num HashSet detecta ciclo com menos raciocínio, mas gasta O(n) de espaço.", flip: "espaço extra é permitido" },
+    { k: "reverse", v: "see", why: "Achar o meio com fast & slow costuma ser o primeiro passo antes de reverter a segunda metade." },
+  ],
+  reverse: [
+    { k: "stack", v: "alt", why: "Empilhar os nós e desempilhar também inverte a ordem, mas gasta O(n) de espaço." },
+    { k: "dummy", v: "see", why: "Reverter um trecho no meio fica mais simples com um nó sentinela antes da cabeça." },
+  ],
+  dummy: [
+    { name: "Tratar a cabeça à parte", v: "alt", why: "Um if para quando a cabeça muda também funciona, mas duplica a lógica e é onde aparecem os bugs." },
+    { k: "reverse", v: "see", why: "Os dois são técnicas de ponteiros, e muitos problemas usam ambas." },
+  ],
+  bfstree: [
+    { k: "postorder", v: "fail", why: "Na menor profundidade, min(esquerda, direita) + 1 trata um filho ausente como se fosse uma folha.", cx: "raiz com apenas um filho à esquerda: a recursão ingênua dá 1; a menor profundidade é 2" },
+    { k: "preorder", v: "alt", why: "Uma DFS que passa o nível como parâmetro também agrupa os nós por nível." },
+  ],
+  inorder: [
+    { name: "Comparar só com os filhos", v: "fail", why: "Cada nó precisa respeitar os limites herdados de todos os ancestrais, não só os do pai.", cx: "[5, 1, 6, null, null, 3, 7]: cada pai é coerente com seus filhos, mas o 3 está na subárvore direita do 5" },
+    { k: "preorder", v: "alt", why: "Validar passando (min, max) para os filhos também resolve, em O(n)." },
+  ],
+  postorder: [
+    { k: "preorder", v: "see", why: "Pós-ordem combina o que sobe dos filhos. Se a informação vem de cima (soma do caminho até aqui), é pré-ordem.", flip: "a resposta depende do caminho desde a raiz" },
+    { k: "bfstree", v: "see", why: "Perguntas por nível ou por profundidade mínima ficam mais simples com BFS.", flip: "a pergunta é sobre níveis" },
+  ],
+  preorder: [
+    { k: "postorder", v: "see", why: "Se o nó precisa de uma resposta calculada pelos filhos (altura, diâmetro), a informação sobe: pós-ordem.", flip: "a resposta depende das subárvores" },
+    { k: "prefix", v: "see", why: "Caminhos que começam em qualquer nó juntam a pré-ordem com prefix sum + hashmap ao longo do caminho." },
+  ],
+  bfs: [
+    { name: "DFS", v: "fail", why: "A DFS encontra um caminho, não necessariamente o mais curto. A BFS visita por distância.", cx: "arestas a–b, b–c, c–d, a–d, saindo de a: a DFS chega em d com 3 passos; o menor caminho tem 1" },
+    { k: "dijkstra", v: "see", why: "A BFS conta arestas. Com pesos, o menor número de arestas pode não ser o menor custo.", flip: "as arestas têm peso" },
+  ],
+  msbfs: [
+    { k: "bfs", v: "alt", why: "Rodar uma BFS a partir de cada fonte também dá a resposta, mas custa O((m·n)²) em vez de O(m·n)." },
+  ],
+  dijkstra: [
+    { k: "bfs", v: "fail", why: "A BFS minimiza o número de arestas, não a soma dos pesos.", cx: "a→b (peso 5), a→c (1), c→b (1): pela BFS, a→b custa 5; o menor custo é 2" },
+    { name: "Bellman-Ford", v: "see", why: "Com pesos negativos, um nó já fechado pode melhorar depois, e Dijkstra quebra. Bellman-Ford relaxa todas as arestas V − 1 vezes.", flip: "há pesos negativos ou limite de K paradas" },
+  ],
+  topo: [
+    { k: "uf", v: "fail", why: "Union-find detecta ciclos em grafos não dirigidos. Num grafo dirigido, ele acusa ciclo onde só há dois caminhos para o mesmo nó.", cx: "a→b, a→c, b→c: não há ciclo dirigido, mas o union-find acusa ciclo na terceira aresta" },
+    { k: "flood", v: "alt", why: "Uma DFS com três estados (não visitado, em andamento, terminado) também detecta ciclo dirigido e gera a ordem pela pós-ordem invertida." },
+  ],
+  flood: [
+    { k: "uf", v: "alt", why: "Union-find também conta componentes, e é melhor quando as conexões chegam aos poucos.", flip: "as arestas chegam uma a uma, com perguntas no meio" },
+    { k: "bfs", v: "see", why: "A inundação pode ser feita com DFS ou BFS. A BFS evita estouro de pilha em grids grandes." },
+  ],
+  uf: [
+    { k: "flood", v: "alt", why: "Se o grafo vem pronto e só é preciso contar componentes, uma DFS basta.", flip: "nenhuma pergunta é intercalada com as conexões" },
+    { k: "topo", v: "see", why: "Union-find não enxerga direção. Ciclos em grafos dirigidos são trabalho da ordenação topológica." },
+  ],
+  merge: [
+    { k: "rooms", v: "see", why: "Mesclar conta blocos contínuos, não quantos intervalos estão ativos ao mesmo tempo.", cx: "[[1, 5], [2, 3], [4, 6]]: vira 1 bloco, mas no máximo 2 intervalos estão ativos juntos" },
+    { k: "byend", v: "see", why: "Para manter o máximo de intervalos sem sobreposição, a ordenação é pelo fim, não pelo início.", flip: "pedem o máximo de não sobrepostos ou o mínimo a remover" },
+  ],
+  rooms: [
+    { k: "merge", v: "fail", why: "Mesclar diz quantos blocos existem, não quantas salas são necessárias ao mesmo tempo.", cx: "[[1, 5], [2, 3], [4, 6]]: 1 bloco mesclado, mas são precisas 2 salas" },
+    { name: "Eventos +1 / −1", v: "alt", why: "Transformar cada intervalo em dois eventos e varrer em ordem também funciona. No empate, o fim vem antes se intervalos que se tocam não conflitam." },
+  ],
+  byend: [
+    { k: "merge", v: "fail", why: "Ordenar pelo início pode prender você a um intervalo longo que bloqueia vários curtos.", cx: "[[1, 10], [2, 3], [4, 5]]: pelo início você mantém 1; pelo fim, 2" },
+    { k: "dp1", v: "see", why: "Se os intervalos têm peso, terminar cedo deixa de ser sempre o melhor. Aí é programação dinâmica sobre os intervalos ordenados (com binary search).", flip: "os intervalos têm peso ou valor" },
+  ],
+  twoheaps: [
+    { k: "heap", v: "see", why: "Um heap só entrega um extremo. A mediana precisa dos dois lados do meio.", flip: "pedem os K maiores, não o meio" },
+    { name: "Ordenar a cada consulta", v: "alt", why: "Funciona, mas custa O(n log n) por consulta, contra O(log n) por inserção." },
+  ],
+  lru: [
+    { name: "Dicionário + horário de acesso", v: "alt", why: "Funciona, mas achar o menos recente exige varrer todas as chaves: O(n) por expulsão." },
+    { k: "heap", v: "alt", why: "Um heap pelo horário de acesso dá O(log n), mas atualizar um acesso exige remoção preguiçosa." },
+  ],
+  minstack: [
+    { name: "Uma variável com o mínimo", v: "fail", why: "A variável não sabe qual era o mínimo anterior quando o atual é desempilhado.", cx: "empilha 2, empilha 1, desempilha: a variável continua 1; o mínimo é 2" },
+  ],
+  fenwick: [
+    { k: "prefix", v: "alt", why: "Sem atualizações, um vetor de prefixos responde cada soma em O(1).", flip: "o array não muda depois de montado" },
+    { name: "Segment tree", v: "alt", why: "Também resolve, e cobre mínimo/máximo em range e atualizações em range, com mais código." },
+  ],
+  bsanswer: [
+    { k: "binsearch", v: "see", why: "A mesma busca, mas sobre o espaço de respostas possíveis em vez de sobre um array." },
+    { name: "Testar X = 1, 2, 3…", v: "alt", why: "Testar cada candidato em ordem é correto, mas custa O(n · tamanho do intervalo)." },
+    { k: "greedy", v: "see", why: "O teste de viabilidade costuma ser uma passada gulosa: \"cabe com capacidade X?\"." },
+  ],
+  bits: [
+    { k: "hash", v: "alt", why: "Contar ocorrências num hash resolve com O(n) de espaço. O XOR resolve com O(1).", flip: "espaço extra é permitido" },
+  ],
+};
+
+/* Painel de estudo (opcional): quando a página roda dentro do painel de estudo, um bloco #state traz os
+   problemas já resolvidos, e window.COACH_LC mapeia número do LeetCode → problema do estudo, para esconder
+   clássicos que o leitor ainda não resolveu. Fora do painel, nada disso existe e a página fica como sempre. */
+const STUDY = (() => {
+  try { const el = document.getElementById("state"); return el ? JSON.parse(el.textContent) : null; } catch (e) { return null; }
+})();
+const SOLVED = (STUDY && STUDY.solved) || [];
+const COACH_LC = window.COACH_LC || null;
+const solvedAt = k => SOLVED.filter(s => s.leaf === k);
+const isHiddenClassic = n => !!(COACH_LC && COACH_LC[n] && !SOLVED.some(s => s.n === COACH_LC[n]));
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const isLeaf = go => go.startsWith("p:");
+const leafId = go => go.slice(2);
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+// rota (índices de opção) até cada folha; a primeira encontrada vale
+const routes = {};
+(function walk(id, r) {
+  N[id].opts.forEach((o, i) => {
+    const nr = [...r, i];
+    if (isLeaf(o.go)) { if (!routes[leafId(o.go)]) routes[leafId(o.go)] = nr; }
+    else walk(o.go, nr);
+  });
+})("root", []);
+
+function reachable(id, acc = new Set()) {
+  N[id].opts.forEach(o => isLeaf(o.go) ? acc.add(leafId(o.go)) : reachable(o.go, acc));
+  return acc;
+}
+
+/* ---------- estado ---------- */
+let path = [];   // [{ node, i }]
+let openLeaf = null;
+
+function goRoute(route) {
+  path = []; let node = "root";
+  for (const i of route) { path.push({ node, i }); const go = N[node].opts[i].go; if (isLeaf(go)) break; node = go; }
+}
+function current() {
+  if (!path.length) return "root";
+  const last = path[path.length - 1];
+  return N[last.node].opts[last.i].go;
+}
+
+/* ---------- render ---------- */
+function codeHTML(src) {
+  return src.split("\n").map(l => {
+    const k = l.indexOf("//");
+    return k < 0 ? esc(l) : esc(l.slice(0, k)) + '<span class="cm">' + esc(l.slice(k)) + "</span>";
+  }).join("\n");
+}
+
+/* padrões que existem abaixo de uma opção: o leque de soluções antes de chegar à folha */
+function previewHTML(o) {
+  const ks = isLeaf(o.go) ? [leafId(o.go)] : [...reachable(o.go)];
+  const max = 6;
+  const got = SOLVED.filter(s => ks.includes(s.leaf)).length;
+  return `<span class="pv">${ks.slice(0, max).map(k => `<span class="mini">${esc(P[k].name)}</span>`).join("")}${ks.length > max ? `<span class="mini more">+${ks.length - max}</span>` : ""}${got ? `<span class="got">✓ ${got} resolvido${got > 1 ? "s" : ""}</span>` : ""}</span>`;
+}
+
+function leafChipHTML(k) {
+  const got = solvedAt(k).length;
+  return `<button type="button" class="leafchip" data-leaf="${k}">${esc(P[k].name)}</button>${got ? `<span class="got">✓ ${got}</span>` : ""}`;
+}
+
+/* subárvore a partir de um nó: categorias de decisão → padrões */
+function mapHTML(id, nested) {
+  return `<ul${nested ? "" : ' class="map"'}>${N[id].opts.map(o => {
+    const head = `<span class="mt">${esc(o.t)}</span>${o.s ? `<span class="ms">${esc(o.s)}</span>` : ""}`;
+    if (isLeaf(o.go)) return `<li>${head}<span class="ml">${leafChipHTML(leafId(o.go))}</span></li>`;
+    return `<li>${head}<span class="mq">${esc(N[o.go].q)}</span>${mapHTML(o.go, true)}</li>`;
+  }).join("")}</ul>`;
+}
+
+const VERD = { fail: ["não serve aqui", ""], alt: ["também funciona", " alt"], see: ["parente próximo", " see"] };
+function boundHTML(b) {
+  const [label, cls] = VERD[b.v];
+  const who = b.k ? `<button type="button" class="leafchip" data-leaf="${b.k}">${esc(P[b.k].name)}</button>` : `<span class="bn">${esc(b.name)}</span>`;
+  return `<div class="bound"><div class="bh">${who}<span class="verd${cls}">${label}</span></div>
+    <p>${esc(b.why)}</p>
+    ${b.flip ? `<p><span class="lbl">Escolha o vizinho quando</span>${esc(b.flip)}</p>` : ""}
+    ${b.cx ? `<p><span class="lbl">Contraexemplo</span><code>${esc(b.cx)}</code></p>` : ""}</div>`;
+}
+
+function solvedHTML(s) {
+  const title = s.title ? `P${String(s.n).padStart(3, "0")} · ${s.title}` : `Problema ${s.n}`;
+  return `<div class="solved-item"><b>${esc(title)}</b>
+    ${s.works ? `<p><span class="lbl">Por que funciona</span>${esc(s.works)}</p>` : ""}
+    ${(s.nb || []).map(x => `<p><span class="lbl">Por que não ${esc(x.name)}</span>${esc(x.why)}</p>`).join("")}</div>`;
+}
+
+function renderWalker() {
+  const cur = current();
+  const crumbs = path.map((st, idx) => {
+    const n = N[st.node], o = n.opts[st.i];
+    return `<li><button type="button" data-back="${idx}" title="Voltar a esta pergunta"><span class="cq">${esc(n.q)}</span><span class="ca">${esc(o.t)}</span></button></li>`;
+  }).join("");
+  let body;
+  if (isLeaf(cur)) {
+    const p = P[leafId(cur)];
+    body = `<div class="done"><span class="eyebrow">Padrão encontrado</span><h2>${esc(p.name)}</h2>
+      <div class="row-btns"><button type="button" class="btn" data-back="${path.length - 1}">Voltar uma pergunta</button><button type="button" class="btn primary" data-reset>Recomeçar</button></div></div>`;
+  } else {
+    const n = N[cur];
+    body = `<div class="q"><span class="eyebrow">Pergunta ${path.length + 1}</span><h2>${esc(n.q)}</h2></div>
+      ${D[cur] ? `<p class="disc">${esc(D[cur])}</p>` : ""}
+      <div class="opts">${n.opts.map((o, i) => `<button type="button" class="opt${isLeaf(o.go) ? " to-leaf" : ""}" data-opt="${i}"><span class="k">${i < 9 ? i + 1 : "·"}</span><span class="t">${esc(o.t)}${o.s ? `<span class="s">${esc(o.s)}</span>` : ""}${previewHTML(o)}</span></button>`).join("")}</div>
+      ${path.length ? `<div class="row-btns"><button type="button" class="btn" data-reset>Recomeçar</button></div>` : ""}`;
+  }
+  $("#walker").innerHTML = `<ol class="crumbs">${crumbs}</ol>${body}`;
+}
+
+function cardHTML(id) {
+  const p = P[id];
+  const nb = F[id] || [];
+  const mine = solvedAt(id);
+  const shown = p.cl.filter(c => !isHiddenClassic(c.n));
+  const hidden = p.cl.length - shown.length;
+  return `<span class="eyebrow leafc">Padrão</span>
+    <h2>${esc(p.name)}</h2>
+    <div class="sec"><h3>Por que funciona</h3><p class="idea">${esc(p.idea)}</p></div>
+    <dl class="facts"><div><dt>Estrutura</dt><dd>${esc(p.ds)}</dd></div><div><dt>Operação-chave</dt><dd>${esc(p.op)}</dd></div><div><dt>Complexidade</dt><dd>${esc(p.cx)}</dd></div></dl>
+    ${mine.length ? `<div class="sec"><h3>Seus problemas aqui</h3><div class="solved">${mine.map(solvedHTML).join("")}</div></div>` : ""}
+    ${nb.length ? `<div class="sec"><h3>Fronteiras: vizinhos que parecem servir</h3><div class="bounds">${nb.map(boundHTML).join("")}</div></div>` : ""}
+    <div class="sec"><h3>Sinais no enunciado</h3><div class="chips">${p.sig.map(s => `<span class="sig">${esc(s)}</span>`).join("")}</div></div>
+    <div class="sec"><h3>Template</h3><div class="code"><button type="button" class="btn copy" data-copy>copiar</button><pre><code>${codeHTML(p.tpl)}</code></pre></div></div>
+    <div class="sec"><h3>Para treinar, nesta ordem</h3>${shown.length ? `<ol class="classics">${shown.map(c => `<li><span class="num">#${c.n}</span><span><a href="https://leetcode.com/problems/${c.slug}/" target="_blank" rel="noopener">${esc(c.name)}</a>${c.prem ? '<span class="prem">premium</span>' : ""}</span></li>`).join("")}</ol>` : ""}${hidden ? `<p class="hidden-note">${hidden} ${hidden > 1 ? "clássicos ocultos: são problemas" : "clássico oculto: é um problema"} do seu estudo ainda não resolvido${hidden > 1 ? "s" : ""}.</p>` : ""}</div>
+    <div class="trap"><span class="eyebrow">Armadilha</span><p>${esc(p.trap)}</p></div>`;
+}
+
+function renderCard() {
+  const cur = current();
+  const el = $("#card");
+  if (isLeaf(cur)) { el.innerHTML = cardHTML(leafId(cur)); return; }
+  if (cur === "root") {
+    el.innerHTML = `<div class="intro" style="display:grid;gap:16px">
+      <span class="eyebrow">Como usar</span>
+      <h2>Três leituras antes de codar</h2>
+      <ol>
+        <li><b>Constraints:</b> o tamanho de n diz a complexidade que você pode pagar, e isso já corta metade dos padrões.</li>
+        <li><b>Forma do input:</b> array, lista, árvore, grafo, intervalos, classe. É a primeira pergunta ao lado.</li>
+        <li><b>O que é pedido + a restrição:</b> contíguo ou não, ordenado ou não, todos ou o ótimo. As perguntas seguintes afunilam até o padrão.</li>
+      </ol>
+      <div class="example">
+        <span class="eyebrow">Exemplo · #3 Longest Substring Without Repeating Characters</span>
+        <div class="route"><span>Array ou string</span><i>→</i><span>Subarray/substring contíguo</span><i>→</i><span>Restrição que quebra ao crescer</span><i>→</i><button type="button" class="leafchip" data-leaf="window">Sliding window</button></div>
+      </div>
+      <div class="sec"><h3>${Object.keys(P).length} padrões nesta árvore</h3><div class="chips">${Object.keys(P).map(k => `<button type="button" class="leafchip" data-leaf="${k}">${esc(P[k].name)}</button>`).join("")}</div></div>
+    </div>`;
+    return;
+  }
+  const cands = [...reachable(cur)];
+  el.innerHTML = `<span class="eyebrow">Mapa a partir daqui</span>
+    <h2>${cands.length} padrões possíveis</h2>
+    <p class="idea">Cada ramo é uma família de problemas, com as soluções que existem nela. Compare os ramos pelo que os separa e só então responda à pergunta ao lado.</p>
+    ${mapHTML(cur)}`;
+}
+
+function render(scrollCard) {
+  renderWalker(); renderCard();
+  const cur = current();
+  try { history.replaceState(null, "", isLeaf(cur) ? "#" + leafId(cur) : location.pathname + location.search); } catch (e) {}
+  if (scrollCard && isLeaf(cur) && window.innerWidth < 880) $("#card").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ---------- árvore completa ---------- */
+function treeHTML(id, route) {
+  return N[id].opts.map((o, i) => {
+    const r = [...route, i].join(",");
+    if (isLeaf(o.go)) {
+      const k = leafId(o.go);
+      return `<li class="leaf" data-k="${k}"><span class="edge">${esc(o.t)}</span><button type="button" class="leafchip" data-route="${r}">${esc(P[k].name)}</button></li>`;
+    }
+    return `<li class="branch"><span class="edge">${esc(o.t)}</span><span class="qn">${esc(N[o.go].q)}</span><ul>${treeHTML(o.go, [...route, i])}</ul></li>`;
+  }).join("");
+}
+$("#tree").innerHTML = `<li class="branch"><span class="qn">${esc(N.root.q)}</span><ul>${treeHTML("root", [])}</ul></li>`;
+
+function applyFilter() {
+  const q = norm($("#filter").value.trim());
+  const tree = $("#tree"), out = $("#results");
+  if (!q) { tree.classList.remove("filtering"); tree.querySelectorAll("li.leaf").forEach(li => li.classList.remove("hit")); out.innerHTML = ""; return; }
+  const hits = Object.keys(P).filter(k => {
+    const p = P[k];
+    return norm([p.name, p.ds, p.op, p.idea, ...p.sig, ...p.cl.map(c => c.name + " " + c.n)].join(" | ")).includes(q);
+  });
+  tree.classList.add("filtering");
+  tree.querySelectorAll("li.leaf").forEach(li => li.classList.toggle("hit", hits.includes(li.dataset.k)));
+  out.innerHTML = hits.length
+    ? hits.map(k => `<button type="button" class="leafchip" data-leaf="${k}">${esc(P[k].name)}</button>`).join("")
+    : `<span class="none">Nenhum padrão menciona "${esc($("#filter").value.trim())}". Tente um sinônimo.</span>`;
+}
+$("#filter").addEventListener("input", applyFilter);
+
+/* ---------- eventos ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.opt !== undefined) { const node = current(); path.push({ node, i: +b.dataset.opt }); render(true); }
+  else if (b.dataset.back !== undefined) { path = path.slice(0, +b.dataset.back); render(); }
+  else if (b.hasAttribute("data-reset")) { path = []; render(); }
+  else if (b.dataset.leaf) { goRoute(routes[b.dataset.leaf]); render(true); if (window.innerWidth >= 880) $("#walker").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  else if (b.dataset.route) { goRoute(b.dataset.route.split(",").map(Number)); render(true); $(".main").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  else if (b.hasAttribute("data-copy")) {
+    const pre = b.parentElement.querySelector("pre");
+    const done = () => { b.textContent = "copiado"; setTimeout(() => b.textContent = "copiar", 1400); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "selecionado"; };
+    try { navigator.clipboard.writeText(pre.innerText).then(done, fallback); } catch (err) { fallback(); }
+  }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  const cur = current();
+  if (/^[1-9]$/.test(e.key) && !isLeaf(cur)) {
+    const i = +e.key - 1;
+    if (i < N[cur].opts.length) { path.push({ node: cur, i }); render(true); }
+  } else if (e.key === "Backspace" && path.length) { e.preventDefault(); path.pop(); render(); }
+});
+
+/* deep-link: #window abre a ficha direto */
+const h = (location.hash || "").slice(1);
+if (h && routes[h]) goRoute(routes[h]);
+render();
+</script>

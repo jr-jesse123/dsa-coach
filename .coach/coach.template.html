@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coach DSA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Mesmos tokens da "Árvore de Padrões LeetCode" do usuário. */
+:root {
+  --bg: #F1F3F7; --surface: #FFFFFF; --ink: #131826; --muted: #5B6476; --line: #D8DDE7;
+  --accent: #2646C4; --accent-soft: #E4E9FB; --leaf: #0E7556; --leaf-soft: #DDF2EA;
+  --warn: #9A5B00; --warn-soft: #FBF0DD; --code-bg: #EDF0F5;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1118; --surface: #151B26; --ink: #E4E8F0; --muted: #8E98AA; --line: #273043;
+    --accent: #8FA3FF; --accent-soft: #1E2747; --leaf: #52CFA0; --leaf-soft: #133029;
+    --warn: #F0B45C; --warn-soft: #2E2414; --code-bg: #0F141D; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1118; --surface: #151B26; --ink: #E4E8F0; --muted: #8E98AA; --line: #273043;
+  --accent: #8FA3FF; --accent-soft: #1E2747; --leaf: #52CFA0; --leaf-soft: #133029;
+  --warn: #F0B45C; --warn-soft: #2E2414; --code-bg: #0F141D; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { margin: 0; color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+button { font: inherit; color: inherit; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.wrap { max-width: 1140px; margin: 0 auto; padding: 24px 16px 64px; display: grid; gap: 24px; }
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.top h1 { font-size: clamp(26px, 3.6vw, 36px); letter-spacing: -0.02em; line-height: 1.05; }
+.top .ctx { color: var(--muted); font-size: 13.5px; }
+
+/* abas: sempre no topo */
+.tabs { position: sticky; top: 0; z-index: 5; display: flex; gap: 4px; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.tab { flex: 1 1 0; min-width: 0; border: 0; background: none; border-radius: 8px; padding: 9px 12px; cursor: pointer; display: grid; gap: 1px; text-align: left; }
+.tab .tl { font-family: var(--f-display); font-weight: 700; font-size: 16px; }
+.tab .ts { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tab:hover { background: var(--bg); }
+.tab[aria-selected="true"] { background: var(--accent-soft); }
+.tab[aria-selected="true"] .tl { color: var(--accent); }
+.tab .badge { display: inline-block; margin-left: 6px; font-family: var(--f-mono); font-size: 11px; color: var(--surface); background: var(--accent); border-radius: 999px; padding: 0 7px; vertical-align: 2px; }
+.tab .badge[hidden] { display: none; }
+[role="tabpanel"] { display: grid; gap: 28px; min-width: 0; }
+[role="tabpanel"][hidden] { display: none; }
+
+/* ---------- aba Coach ---------- */
+#tab-coach .phases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+#tab-coach .phase { padding: 14px 16px; border-left: 1px solid var(--line); display: grid; gap: 4px; align-content: start; min-width: 0; }
+#tab-coach .phase:first-child { border-left: 0; }
+#tab-coach .phase .n { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+#tab-coach .phase .t { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+#tab-coach .phase .d { font-size: 13px; color: var(--muted); }
+#tab-coach .phase.on { background: var(--accent-soft); }
+#tab-coach .phase.on .n { color: var(--accent); }
+@media (max-width: 760px) {
+  #tab-coach .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #tab-coach .phase:nth-child(3) { border-left: 0; }
+  #tab-coach .phase:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+#tab-coach .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { #tab-coach .grid { grid-template-columns: minmax(0, 1fr); } }
+#tab-coach .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+#tab-coach .panel h2 { font-size: 20px; }
+#tab-coach .muted { color: var(--muted); }
+#tab-coach .crumbs { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+#tab-coach .crumbs li { position: relative; padding: 6px 8px 6px 24px; display: grid; gap: 1px; }
+#tab-coach .crumbs li::before { content: ""; position: absolute; left: 9px; top: 0; bottom: 0; width: 1px; background: var(--line); }
+#tab-coach .crumbs li::after { content: ""; position: absolute; left: 6px; top: 14px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+#tab-coach .crumbs li.open::after { background: var(--surface); border: 1.5px solid var(--accent); }
+#tab-coach .crumbs .cq { font-size: 12.5px; color: var(--muted); }
+#tab-coach .crumbs .ca { font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
+#tab-coach .leafchip { display: inline-block; background: var(--leaf-soft); color: var(--leaf); border-radius: 999px; padding: 3px 11px; font-size: 13px; font-weight: 500; }
+#tab-coach .fb { display: grid; gap: 12px; }
+#tab-coach .fb-item { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; background: var(--bg); min-width: 0; }
+#tab-coach .fb-item .meta { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+#tab-coach .fb-item p { margin: 0; overflow-wrap: anywhere; }
+#tab-coach .verdict { font-family: var(--f-mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+#tab-coach .verdict.good { background: var(--leaf-soft); color: var(--leaf); }
+#tab-coach .verdict.warn { background: var(--warn-soft); color: var(--warn); }
+#tab-coach .verdict.info { background: var(--accent-soft); color: var(--accent); }
+#tab-coach code { font-family: var(--f-mono); font-size: 0.9em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+#tab-coach .ask { border-radius: 10px; padding: 14px; background: var(--accent-soft); display: grid; gap: 10px; }
+#tab-coach .ask .q { font-family: var(--f-display); font-weight: 700; font-size: 18px; line-height: 1.3; }
+#tab-coach textarea, #tab-coach select { width: 100%; font: inherit; font-size: 14px; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+#tab-coach textarea { min-height: 84px; resize: vertical; }
+#tab-coach .chat { display: grid; gap: 10px; max-height: 58vh; overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+#tab-coach .msg { max-width: 92%; padding: 10px 13px; border-radius: 12px; border: 1px solid var(--line); background: var(--accent-soft); display: grid; gap: 4px; min-width: 0; }
+#tab-coach .msg.you { justify-self: end; background: var(--surface); }
+#tab-coach .msg .who { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); }
+#tab-coach .msg p { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+#tab-coach .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#tab-coach .btn { font-size: 13.5px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+#tab-coach .btn:hover { border-color: var(--accent); }
+#tab-coach .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+#tab-coach .status { font-size: 12.5px; color: var(--leaf); }
+#tab-coach .seqs { display: grid; gap: 8px; }
+#tab-coach .seq { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+#tab-coach .seq b { font-weight: 600; }
+#tab-coach .seq span { display: block; font-size: 13px; color: var(--muted); }
+#tab-coach .empty { border: 1px dashed var(--line); border-radius: 10px; padding: 14px; color: var(--muted); font-size: 14px; }
+
+/* ---------- aba Árvore (CSS do artifact do usuário, escopado) ---------- */
+#tab-tree .sent { font-size: 12.5px; color: var(--leaf); }
+/*TREE_CSS*/
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Coach DSA</h1>
+    <span class="ctx">TopCoding · Array (Medium) · 47 problemas</span>
+  </div>
+
+<!--NAV_START-->  <nav class="tabs" role="tablist" aria-label="Seções">
+    <button class="tab" role="tab" id="t-tree" aria-controls="tab-tree" aria-selected="true" type="button">
+      <span class="tl">Árvore de padrões</span><span class="ts">Comece aqui: constraints → forma → pedido</span>
+    </button>
+    <button class="tab" role="tab" id="t-coach" aria-controls="tab-coach" aria-selected="false" type="button">
+      <span class="tl">Coach<span class="badge" id="fb-count" hidden></span></span><span class="ts" id="coach-sub">Problema, pergunta da vez, feedback</span>
+    </button>
+  </nav><!--NAV_END-->
+
+<!--TREESEC_START-->  <section id="tab-tree" role="tabpanel" aria-labelledby="t-tree">
+<!--TREE_MARKUP-->
+  </section><!--TREESEC_END-->
+
+<!--COACHSEC_START-->  <section id="tab-coach" role="tabpanel" aria-labelledby="t-coach" hidden>
+    <div class="phases" id="phases" aria-label="Fases do loop"></div>
+    <div class="grid">
+      <div class="panel" id="left"></div>
+      <div class="panel" id="right">
+        <span class="eyebrow">Conversa</span>
+        <div class="chat" id="chat" tabindex="0" aria-label="Conversa com o coach"></div>
+        <form class="ask" id="ask">
+          <textarea name="answer" id="answer" placeholder="Escreva sua resposta ou pergunta… (Ctrl+Enter envia)" aria-label="Sua mensagem"></textarea>
+          <div class="row"><button class="btn primary" type="submit">Enviar</button><span class="status" id="ask-status" role="status"></span></div>
+        </form>
+        <span class="eyebrow">Feedback dos saves</span>
+        <div id="fb"></div>
+      </div>
+    </div>
+  </section>
+</div><!--COACHSEC_END-->
+
+<!-- Estado: Claude atualiza este bloco; a aba Coach é renderizada a partir dele. -->
+<script type="application/json" id="state">
+{
+  "phase": "pick",
+  "problem": null,
+  "path": [],
+  "question": null,
+  "thread": [],
+  "feedback": [],
+  "solved": []
+}
+</script>
+
+<!--LC_START--><script>
+/* número do LeetCode → número do problema no estudo; a aba Árvore esconde clássicos ainda não resolvidos */
+window.COACH_LC = {11:1,33:2,36:3,45:4,53:5,55:6,56:7,63:8,64:9,74:10,120:11,128:12,134:13,152:14,153:15,198:16,209:17,213:18,215:19,221:20,274:21,287:22,300:23,322:24,334:25,393:26,435:27,442:28,452:29,456:30,494:31,525:32,553:33,554:34,560:35,665:36,713:37,740:38,807:39,848:40,849:41,945:42,1004:43,1535:44,1838:45,1921:46,2962:47};
+</script><!--LC_END-->
+
+<!--TABS_JS_START--><script>
+/* ---------- abas ---------- */
+(() => {
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  const show = id => {
+    tabs.forEach(t => {
+      const on = t.id === id;
+      t.setAttribute("aria-selected", on);
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    });
+    try { localStorage.setItem("coach-tab", id); } catch (e) {}
+  };
+  tabs.forEach(t => t.addEventListener("click", () => show(t.id)));
+  document.querySelector('[role="tablist"]').addEventListener("keydown", e => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const i = tabs.findIndex(t => t.getAttribute("aria-selected") === "true");
+    const next = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+    show(next.id); next.focus();
+  });
+  let saved = null;
+  try { saved = localStorage.getItem("coach-tab"); } catch (e) {}
+  show(saved && document.getElementById(saved) ? saved : "t-tree");
+})();
+</script><!--TABS_JS_END-->
+
+<!--TREE_JS_START--><script>
+/*TREE_JS*/
+</script><!--TREE_JS_END-->
+
+<!--COACH_JS_START--><script>
+/* ---------- aba Coach ---------- */
+(() => {
+const PROBLEMS = ["Container With Most Water","Search in Rotated Sorted Array","Valid Sudoku","Jump Game II","Maximum Subarray","Jump Game","Merge Intervals","Unique Paths II","Minimum Path Sum","Search a 2D Matrix","Triangle","Longest Consecutive Sequence","Gas Station","Maximum Product Subarray","Find Minimum in Rotated Sorted Array","House Robber","Minimum Size Subarray Sum","House Robber II","Kth Largest Element in an Array","Maximal Square","H-Index","Find the Duplicate Number","Longest Increasing Subsequence","Coin Change","Increasing Triplet Subsequence","UTF-8 Validation","Non-overlapping Intervals","Find All Duplicates in an Array","Minimum Number of Arrows to Burst Balloons","132 Pattern","Target Sum","Contiguous Array","Optimal Division","Brick Wall","Subarray Sum Equals K","Non-decreasing Array","Subarray Product Less Than K","Delete and Earn","Max Increase to Keep City Skyline","Shifting Letters","Maximize Distance to Closest Person","Minimum Increment to Make Array Unique","Max Consecutive Ones III","Find the Winner of an Array Game","Frequency of the Most Frequent Element","Eliminate Maximum Number of Monsters","Count Subarrays Where Max Element Appears at Least K Times"];
+const SEQS = [
+  { ids: [17, 35, 37], t: "Subarray com soma/produto", d: "Parecem o mesmo problema, mas uma condição muda o ramo da árvore." },
+  { ids: [27, 29], t: "Intervalos", d: "Qual é o critério de ordenação, e por quê?" },
+  { ids: [16, 18, 38], t: "Família House Robber", d: "O mesmo núcleo de DP com variações de forma." },
+  { ids: [6, 4], t: "Jump Game I e II", d: "Decidir se é possível vs. contar o mínimo de saltos." },
+];
+const PHASES = [
+  { id: "pick", t: "Escolher", d: "Qual problema agora?" },
+  { id: "recognize", t: "Reconhecer", d: "Constraints → forma → pedido → padrão" },
+  { id: "code", t: "Codar", d: "Feedback a cada save relevante" },
+  { id: "justify", t: "Justificar e Discriminar", d: "Complexidade, invariante, armadilhas; mudar uma condição" },
+];
+
+let S = JSON.parse(document.getElementById("state").textContent);
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const inline = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+const label = n => `P${String(n).padStart(3, "0")} · ${PROBLEMS[n - 1]}`;
+const $ = id => document.getElementById(id);
+
+/* envia ao coach: POST no servidor local; o monitor do coach lê a thread */
+const send = (text, tag, data) =>
+  fetch("/api/msg", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, tag, data }) })
+    .then(r => r.ok).catch(() => false);
+window.coachSend = send;
+
+/* cada região só é redesenhada quando o seu pedaço do estado muda: o composer nunca é tocado */
+const sig = {};
+const changed = (k, v) => { const s = JSON.stringify(v); if (sig[k] === s) return false; sig[k] = s; return true; };
+
+function renderTop() {
+  if (!changed("top", [S.phase, S.problem, !!S.question, S.feedback.length])) return;
+  const phase = PHASES.find(p => p.id === S.phase);
+  $("coach-sub").textContent =
+    (S.problem ? `P${String(S.problem).padStart(3, "0")} · ` : "") + (phase ? phase.t : "") + (S.question ? " · há uma pergunta para você" : "");
+  const b = $("fb-count"); b.textContent = S.feedback.length; b.hidden = !S.feedback.length;
+  $("phases").innerHTML = PHASES.map((p, i) =>
+    `<div class="phase${p.id === S.phase ? " on" : ""}"><span class="n">${i + 1}${p.id === S.phase ? " · agora" : ""}</span><span class="t">${p.t}</span><span class="d">${p.d}</span></div>`).join("");
+}
+
+function renderLeft() {
+  if (!changed("left", [S.problem, S.path])) return;
+  const left = $("left");
+  if (!S.problem) {
+    left.innerHTML = `<span class="eyebrow">Problema atual</span><h2>Nenhum ainda</h2>
+      <form id="pick" style="display:grid;gap:10px">
+        <label class="muted" for="psel" style="font-size:13.5px">Qual problema você vai atacar?</label>
+        <select id="psel" name="problem">${PROBLEMS.map((t, i) => `<option value="${i + 1}">${esc(label(i + 1))}</option>`).join("")}</select>
+        <div class="row"><button class="btn primary" type="submit">Enviar escolha</button><span class="status" id="pick-status" role="status"></span></div>
+      </form>
+      <span class="eyebrow" style="margin-top:6px">Ou uma sequência para treinar fronteiras</span>
+      <div class="seqs">${SEQS.map((s, i) => `<div class="seq"><div><b>${s.ids.map(n => "P" + String(n).padStart(3, "0")).join(" → ")}</b> · ${esc(s.t)}<span>${esc(s.d)}</span></div><button class="btn" type="button" data-seq="${i}">Escolher</button></div>`).join("")}</div>`;
+    $("pick").addEventListener("submit", async e => {
+      e.preventDefault();
+      const n = +new FormData(e.currentTarget).get("problem");
+      const ok = await send(`I'll take ${label(n)}. Start the Recognize phase with me.`, "choice", { question: "pick-problem", answer: n });
+      $("pick-status").textContent = ok ? "Enviado." : "Falhou. O servidor está rodando?";
+      poll();
+    });
+    left.querySelectorAll("[data-seq]").forEach(b => b.addEventListener("click", async () => {
+      const s = SEQS[+b.dataset.seq];
+      const ok = await send(`I want to do the sequence ${s.ids.map(label).join(" → ")} (${s.t}). Start with the first one, Recognize phase.`, "choice", { question: "pick-problem", answer: s.ids });
+      b.textContent = ok ? "Enviado" : "Falhou";
+      poll();
+    }));
+  } else {
+    const crumbs = S.path.length
+      ? `<ol class="crumbs">${S.path.map(p => `<li${p.open ? ' class="open"' : ""}><span class="cq">${esc(p.q)}</span><span class="ca">${p.leaf ? `<span class="leafchip">${esc(p.a)}</span>` : esc(p.a)}</span></li>`).join("")}</ol>`
+      : `<div class="empty">O caminho aparece aqui conforme você percorre a árvore (aba ao lado) ou responde às perguntas.</div>`;
+    left.innerHTML = `<span class="eyebrow">Problema atual</span><h2>${esc(label(S.problem))}</h2>
+      <span class="eyebrow" style="margin-top:4px">Caminho na árvore</span>${crumbs}`;
+  }
+}
+
+const para = t => t.split("\n\n").map(p => `<p>${inline(p)}</p>`).join("");
+function renderChat(first) {
+  if (!changed("chat", S.thread)) return;
+  const chat = $("chat");
+  const atBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40;
+  chat.innerHTML = S.thread.length
+    ? S.thread.map(m => `<div class="msg ${m.from === "you" ? "you" : "coach"}"><div class="who">${m.from === "you" ? "Você" : "Coach"}${m.time ? " · " + esc(m.time) : ""}</div>${para(m.text)}</div>`).join("")
+    : `<div class="empty">A conversa com o coach aparece aqui.</div>`;
+  if (first || atBottom) { if (chat.offsetParent === null) pendingBottom = true; else chat.scrollTop = chat.scrollHeight; }
+}
+/* a aba Coach pode estar escondida quando o chat renderiza: rola até o fim quando ela aparecer */
+let pendingBottom = false;
+/* (a página do coach não tem abas: o chat fica sempre visível) */
+
+function renderFeedback() {
+  if (!changed("fb", S.feedback)) return;
+  $("fb").innerHTML = S.feedback.length
+    ? `<div class="fb">${S.feedback.slice().reverse().map(f => `<div class="fb-item"><div class="meta"><span class="verdict ${f.kind || "info"}">${esc(f.verdict || "nota")}</span><span>${esc(f.file || "")}</span><span>${esc(f.time || "")}</span></div>${para(f.text)}</div>`).join("")}</div>`
+    : `<div class="empty">Sem feedback ainda. Cada save que mudar a lógica gera uma entrada aqui.</div>`;
+}
+
+function renderAll(first) {
+  S.feedback = S.feedback || []; S.path = S.path || []; S.thread = S.thread || [];
+  renderTop(); renderLeft(); renderChat(first); renderFeedback();
+}
+
+/* composer: estático, com rascunho guardado */
+const ta = $("answer"), askForm = $("ask"), askStatus = $("ask-status");
+try { ta.value = localStorage.getItem("coach-draft") || ""; } catch (e) {}
+ta.addEventListener("input", () => { try { localStorage.setItem("coach-draft", ta.value); } catch (e) {} });
+askForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const a = ta.value.trim();
+  if (!a) return;
+  const ok = await send(a, "answer", { question: S.question || null });
+  askStatus.textContent = ok ? "Enviado." : "Falhou. O servidor está rodando?";
+  if (ok) { ta.value = ""; try { localStorage.removeItem("coach-draft"); } catch (e) {} poll(); }
+});
+ta.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) askForm.requestSubmit(); });
+
+/* polling: sem recarregar a página. Só uma mudança em "solved" recarrega (a aba Árvore lê isso ao carregar). */
+let rev = null, busy = false;
+async function poll() {
+  if (busy) return;
+  busy = true;
+  try {
+    const r = await fetch("/api/state", { cache: "no-store" });
+    if (r.ok) {
+      const j = await r.json();
+      if (j.rev !== rev) {
+        rev = j.rev;
+        const next = Object.assign({}, j.state, { thread: j.thread });
+        S = next;
+        renderAll(false);
+      }
+      if (askStatus.textContent.startsWith("Sem conexão")) askStatus.textContent = "";
+    }
+  } catch (e) {
+    askStatus.textContent = "Sem conexão com o servidor do coach.";
+  } finally { busy = false; }
+}
+renderAll(true);
+setInterval(poll, 1500);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+poll();
+})();
+</script><!--COACH_JS_END-->
+</body>
+</html>

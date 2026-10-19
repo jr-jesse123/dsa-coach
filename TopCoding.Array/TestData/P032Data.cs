@@ -1,0 +1,47 @@
+namespace TopCoding.Array.TestData;
+
+public static class P032Data
+{
+    public static IEnumerable<object[]> Cases => new List<object[]>
+    {
+        new object[] { new int[] { 0, 1 }, 2 },
+        new object[] { new int[] { 0, 1, 0 }, 2 },
+        new object[] { new int[] { 0, 1, 1, 1, 1, 1, 0, 0, 0 }, 6 },
+        new object[] { new int[] { 0 }, 0 },
+        new object[] { new int[] { 1 }, 0 },
+        new object[] { new int[] { 0, 0 }, 0 },
+        new object[] { new int[] { 1, 1, 0 }, 2 },
+        new object[] { new int[] { 0, 0, 1, 0, 0, 0, 1, 1 }, 6 },
+        new object[] { new int[] { 1, 0, 1, 0, 1, 0 }, 6 },
+        new object[] { new int[] { 0, 0, 0, 1, 1 }, 4 },
+        new object[] { Enumerable.Range(0, 100000).Select(i => i % 2).ToArray(), 100000 },
+        new object[] { Enumerable.Repeat(1, 100000).ToArray(), 0 },
+        new object[] { Enumerable.Repeat(0, 50000).Concat(Enumerable.Repeat(1, 50000)).ToArray(), 100000 },
+        new object[] { Enumerable.Repeat(1, 99999).Append(0).ToArray(), 2 },
+        new object[] { new int[] { 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1 }, 14 },
+        new object[] { new int[] { 0, 0, 0, 0, 1, 0 }, 2 },
+        new object[] { new int[] { 0, 0, 1, 1, 1, 1 }, 4 },
+        new object[] { new int[] { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1 }, 2 },
+        new object[] { new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 0 }, 2 },
+        new object[] { new int[] { 0, 1, 1 }, 2 },
+        new object[] { new int[] { 1, 0, 1, 1, 1, 1 }, 2 },
+        new object[] { new int[] { 1, 0, 0 }, 2 },
+        new object[] { new int[] { 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0 }, 8 },
+        new object[] { new int[] { 1, 0 }, 2 },
+        new object[] { new int[] { 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0 }, 14 },
+        new object[] { new int[] { 1, 0, 0, 0, 0, 1 }, 2 },
+        new object[] { new int[] { 1, 0, 1, 1, 0, 1, 1, 1, 1, 0 }, 4 },
+        new object[] { new int[] { 0, 0, 0, 1, 1, 1, 1, 1 }, 6 },
+        new object[] { new int[] { 0, 1, 0, 1 }, 4 },
+        new object[] { new int[] { 0, 0, 1, 1, 0, 1 }, 6 },
+        new object[] { new int[] { 0, 0, 1, 0, 0, 0, 0, 0, 1 }, 2 },
+        new object[] { new int[] { 1, 0, 0, 1, 0, 0, 0 }, 4 },
+        new object[] { new int[] { 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0 }, 12 },
+        new object[] { new int[] { 0, 1, 0, 1, 1, 1, 0, 0, 1 }, 8 },
+        new object[] { new int[] { 0, 1, 0, 1, 1, 1, 1 }, 4 },
+        new object[] { new int[] { 1, 0, 1, 1, 0, 1 }, 4 },
+        new object[] { new int[] { 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0 }, 10 },
+        new object[] { new int[] { 0, 1, 1, 1, 1 }, 2 },
+        new object[] { new int[] { 0, 1, 1, 1 }, 2 },
+    };
+}

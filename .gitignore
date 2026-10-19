@@ -1,0 +1,14 @@
+# build output and IDE state
+bin/
+obj/
+.vs/
+.NCrunch_TopCoding/
+*.ncrunchsolution.user
+
+# generated pages (rebuild with: python .coach/build_coach.py)
+.coach/dist/
+.lavish/
+__pycache__/
+
+# local Claude settings
+.claude/settings.local.json

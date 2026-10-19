@@ -1,0 +1,47 @@
+namespace TopCoding.Array.TestData;
+
+public static class P014Data
+{
+    public static IEnumerable<object[]> Cases => new List<object[]>
+    {
+        new object[] { new int[] { 2, 3, -2, 4 }, 6 },
+        new object[] { new int[] { -2, 0, -1 }, 0 },
+        new object[] { new int[] { -2 }, -2 },
+        new object[] { new int[] { 0 }, 0 },
+        new object[] { new int[] { 0, 2 }, 2 },
+        new object[] { new int[] { -2, 3, -4 }, 24 },
+        new object[] { new int[] { 2, -5, -2, -4, 3 }, 24 },
+        new object[] { new int[] { -1, -1 }, 1 },
+        new object[] { new int[] { -3, 0, 1, -2 }, 1 },
+        new object[] { new int[] { 1, 0, -1, 2, 3, -5, -2 }, 60 },
+        new object[] { new int[] { -2, -3, 0, -4, -5 }, 20 },
+        new object[] { new int[] { 10, 10, 10, 10, 10, 10, 10, 10, 10 }, 1000000000 },
+        new object[] { Enumerable.Repeat(1, 20000).ToArray(), 1 },
+        new object[] { Enumerable.Range(0, 20000).Select(i => i % 2 == 0 ? -1 : 1).ToArray(), 1 },
+        new object[] { new int[] { -1, 0, 1, -4, 0, -2, -2, -4 }, 8 },
+        new object[] { new int[] { 2, -4, -3, -1, 1, 1, -2, -2, 1 }, 48 },
+        new object[] { new int[] { 1, 2, -4, -4, -4 }, 32 },
+        new object[] { new int[] { 3, -2 }, 3 },
+        new object[] { new int[] { 1, 0, 2, -2, -2 }, 8 },
+        new object[] { new int[] { 1, -1, -3, -4, 2 }, 24 },
+        new object[] { new int[] { 0, 1, 2, 3, -2, -2, 1 }, 24 },
+        new object[] { new int[] { -1, 3 }, 3 },
+        new object[] { new int[] { 2, -1, 0, 0, -3, 0, -4 }, 2 },
+        new object[] { new int[] { 4 }, 4 },
+        new object[] { new int[] { -3, 3, 2, -2, 0, 4, 1, 1, -1 }, 36 },
+        new object[] { new int[] { 2, -4, 3, 4 }, 12 },
+        new object[] { new int[] { 2, 3, -2 }, 6 },
+        new object[] { new int[] { -4, -3, 1, -1 }, 12 },
+        new object[] { new int[] { 1, 3, -1, 1, 3, -4 }, 36 },
+        new object[] { new int[] { 2, -2 }, 2 },
+        new object[] { new int[] { 2, 0, 1, -4, 1, -2, 4, 3 }, 96 },
+        new object[] { new int[] { 2, -4, -2, 2, -1, 0, 0 }, 32 },
+        new object[] { new int[] { -1, -2 }, 2 },
+        new object[] { new int[] { -1, 4, 0, 0, -3 }, 4 },
+        new object[] { new int[] { -1, -4, -4 }, 16 },
+        new object[] { new int[] { 3, -1, 4, 3, -4, -1, 1, 2 }, 144 },
+        new object[] { new int[] { 4, -3, 3, 3, 4, -1, -3, -2, -3 }, 2592 },
+        new object[] { new int[] { 0, -4, 0 }, 0 },
+        new object[] { new int[] { -2, -2, 1, 2, 2, -2 }, 16 },
+    };
+}

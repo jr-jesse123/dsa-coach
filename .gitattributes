@@ -1,0 +1,4 @@
+# keep the study tooling byte-identical on checkout (bash scripts break with CRLF)
+*.sh text eol=lf
+.coach/** text eol=lf
+.claude/** text eol=lf
