@@ -117,5 +117,6 @@ Hard rules:
 - `TopCoding.Array/Problems/PNNN_Name/`: `Solution.cs` (the user's code), `PNNN_NameTests.cs`, and `PNNN_Name.md` (the statement).
 - `TopCoding.Array/TestData/PNNNData.cs`: hidden xunit MemberData.
 - `.coach/`: page template, tree source (canonical copy of the artifact), build script, `verify_bounds.py`, `server.py`, `say.py`, `state.json`, `thread.jsonl`, monitor scripts (`inbox-watch.sh`, `lavish-poll.sh`, `watch-solutions.sh`).
-- `.lavish/tree.html`: the built tree page, opened in Lavish.
+- Git (local only, never push: the test data is spoilers): tag `baseline-two-pages` marks the tooling before the needs-first tree; work happens on branch `needs-first-tree`. Commit tooling changes (`.coach/`, `.claude/`) before and after risky edits, and restore a file with `git restore --source=baseline-two-pages <path>`. `.gitattributes` pins the tooling to LF, because bash scripts break with CRLF.
+- `.lavish/tree.html`: the built tree page, opened in Lavish (generated, git-ignored).
 - `.coach/dist/coach.html`: the built coach page, served by `server.py`. (`.lavish/coach.html` is an obsolete leftover.)
