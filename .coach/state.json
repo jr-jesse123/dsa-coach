@@ -1,31 +1,62 @@
 {
-  "phase": "pick",
-  "problem": null,
-  "path": [
-    {"q": "Constraints: n ≤ 10^5", "a": "n² is out; n log n or O(n)"},
-    {"q": "Qual é a forma principal do input?", "a": "Array ou string"},
-    {"q": "O que o enunciado pede sobre o array/string?", "a": "Um par de elementos (a água depende só das duas pontas, não do trecho entre elas)"},
-    {"q": "Dá pra ordenar sem perder o que o problema pede?", "a": "Não: ordenar perde a largura. Raciocínio de fora para dentro: descartar sempre a parede menor", "open": true}
-  ],
-  "question": "Does the drafted bridge (why two pointers works, why not sort / complement hash / DP / moving the taller wall) match your understanding?",
+  "phase": "recognize",
+  "problem": 3,
+  "path": [],
+  "question": "Constraints ruler: what does a fixed 9x9 board allow? Then: what is the input shape?",
   "feedback": [
-    {"verdict": "Right setup", "kind": "good", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:25", "text": "`maxArea` plus one index at each end: the outside-in setup.\n\nNext: what is the loop's stop condition?"},
-    {"verdict": "Correct stop condition", "kind": "good", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:31", "text": "`leftIdx < rightIdx`: when they meet, no container remains.\n\nBody: measure the pair, then discard one end."},
-    {"verdict": "Discard rule taking shape", "kind": "info", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:34", "text": "Comparing the two heights to pick which end moves.\n\nWhen must the current pair be measured? What about the `else` / tie?"},
-    {"verdict": "Left move right; check the right move", "kind": "warn", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:35", "text": "`leftIdx++` matches the rule.\n\nWhat does `rightHeight++` change, and in which direction should the right end move? Trace a tie like `[3, 3]`."},
-    {"verdict": "Index now; check direction", "kind": "warn", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:36", "text": "Moves `rightIdx` now. Where does `rightIdx++` point from the last index: inward or outward?\n\nStill open: the tie and measuring the area."},
-    {"verdict": "Area measured at the right time", "kind": "info", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:37", "text": "Formula and placement (before the move) are right.\n\n`maxArea = ...` keeps the best area or the last? Still open: `rightIdx++` direction, tie, `return`."},
-    {"verdict": "Almost there: the tie", "kind": "warn", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:38", "text": "`Math.Max`, `rightIdx--` and `return maxArea` are right.\n\nTrace `[3, 3]`: which `if` fires? Which end is safe to move in a tie?"},
-    {"verdict": "All tests green", "kind": "good", "file": "P001_ContainerWithMostWater/Solution.cs", "time": "22:42", "text": "The tie case is handled, so every iteration moves an end.\n\nNext: justify complexity and invariant."}
+    {
+      "verdict": "Good start, still a skeleton",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "22:45",
+      "text": "The range `[leftIdx..rightIdx]` with `<=` is a sound frame: both ends are inclusive.\n\nTwo small things: there is a stray `]` in the `while` condition, and `midIdx` and the return are still empty. Direction is right so far."
+    },
+    {
+      "verdict": "Check the `midIdx` line",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "22:47",
+      "text": "The `nums[midIdx] == target` check up front is the right first move.\n\nRun the `midIdx` line by hand on `[4,5,6,7,0,1,2]` with `leftIdx = 0`, `rightIdx = 6`. Is the result a valid index?"
+    },
+    {
+      "verdict": "Right shape, two index slips",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "22:50",
+      "text": "The left-clean case and the `rightIdx = midIdx - 1` move have the right direction.\n\nTwo spots to re-check against your own table: the index in the clean-half test (`nums[0]`), and the bounds of the \"target inside\" test (`nums[rightIdx]`)."
+    },
+    {
+      "verdict": "Tests green, one latent bug",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "08:42",
+      "text": "All P002 tests pass, and the left branch is now correct (`<=` at its left end, `<` at `mid`).\n\nThe right branch still has a strict `<` at `nums[rightIdx]`. A brute force over every rotation of arrays up to length 8 finds inputs that return `-1` for a target that is present, for example `[2,0,1]` with target `1`."
+    }
   ],
   "solved": [
-    {"n": 1, "title": "Container With Most Water", "leaf": "twoptr",
-     "works": "Começando nas duas pontas e movendo para dentro a parede menor: todo par que usa a parede menor com uma linha mais interna é mais estreito e tem a altura limitada por ela, então nunca bate uma área já medida. O(n) tempo, O(1) espaço.",
-     "nb": [
-       {"name": "ordenar por altura", "why": "Ordenar perde os índices, e a largura é metade da área."},
-       {"name": "hash do complemento", "why": "Não há alvo exato para procurar; queremos o máximo de uma fórmula."},
-       {"name": "programação dinâmica", "why": "A área de cada par sai direto das duas pontas: não há subproblema repetido, e uma tabela de pares seria O(n²)."},
-       {"name": "mover a parede maior", "why": "Pula pares sem teto de altura e perde a resposta: em [1,8,6,2,5,4,8,3,7] dá 8 em vez de 49."}
-     ]}
+    {
+      "n": 1,
+      "title": "Container With Most Water",
+      "leaf": "twoptr",
+      "works": "Começando nas duas pontas e movendo para dentro a parede menor: todo par que usa a parede menor com uma linha mais interna é mais estreito e tem a altura limitada por ela, então nunca bate uma área já medida. O(n) tempo, O(1) espaço.",
+      "nb": [
+        {
+          "name": "ordenar por altura",
+          "why": "Ordenar perde os índices, e a largura é metade da área."
+        },
+        {
+          "name": "hash do complemento",
+          "why": "Não há alvo exato para procurar; queremos o máximo de uma fórmula."
+        },
+        {
+          "name": "programação dinâmica",
+          "why": "A área de cada par sai direto das duas pontas: não há subproblema repetido, e uma tabela de pares seria O(n²)."
+        },
+        {
+          "name": "mover a parede maior",
+          "why": "Pula pares sem teto de altura e perde a resposta: em [1,8,6,2,5,4,8,3,7] dá 8 em vez de 49."
+        }
+      ]
+    }
   ]
 }
