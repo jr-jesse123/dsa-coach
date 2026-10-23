@@ -9,7 +9,7 @@ The user studies DSA here in C# (Visual Studio). You coach them Socratically thr
 
 ## 1. Start the environment (every session)
 
-Run these from the repo root (`C:\Desenvolvimento\topcoding`):
+Run these from the repo root (the folder that holds `TopCoding.sln`; all paths below are relative to it):
 
 1. **Start the coach server:** run `python .coach/server.py` with Bash `run_in_background`.
    - It serves the page at http://127.0.0.1:4400 and reuses a server that is already up (it prints `already running`). Give the user the URL.
