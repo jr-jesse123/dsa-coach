@@ -13,8 +13,8 @@ while true; do
   cur=$(snapshot) || continue
   [ -z "$cur" ] && continue
   if [ "$cur" != "$prev" ]; then
-    # md5sum on Windows prefixes binary-mode paths with '*'
-    LC_ALL=C comm -13 <(echo "$prev") <(echo "$cur") | awk '{print $2}' | sed 's/^\*//' | while read -r f; do
+    # strip "<hash> " plus md5sum's mode char (' ' or '*' on Windows); keeps paths with spaces whole
+    LC_ALL=C comm -13 <(echo "$prev") <(echo "$cur") | sed -E 's/^[0-9a-f]+ [ *]//' | while IFS= read -r f; do
       rel=${f#"$ROOT"/}
       echo "changed: $rel ($(wc -l < "$f") lines) @ $(date +%H:%M:%S)"
     done
