@@ -49,6 +49,7 @@ Where to answer:
   - Rebuild with `python .coach/build_coach.py`. State lives in `state.json` and `thread.jsonl`, so a rebuild loses nothing. Lavish live-reloads the tree page; the user refreshes the coach tab to get a new coach layout.
   - Republish the artifact with the Artifact tool (`url` = the link above). Read the live version first, so the two copies never drift.
   - Never use one of the 47 problems as an example in tree text.
+- **Study tree artifact (for the phone):** https://claude.ai/artifact/CQZnWJAXZRTCL9GpFSuKc3 is `.lavish/tree.html` published as is: unsolved classics hidden, `solved` shown on each card. The canonical artifact above shows every classic, so it spoils the 47; point the user to the study one instead. After every rebuild (a tree change or a new `solved` entry), republish `.lavish/tree.html` to that `url`.
 - **Coach:** a chat thread plus the problem, phase, tree path and save feedback. Three files, one writer each:
   - `.coach/state.json` is written only by you (Edit it directly). The page polls it and redraws only the regions that changed, with no reload. Fields:
     - `phase`: `pick` | `understand` | `recognize` | `code` | `justify`
