@@ -247,10 +247,15 @@ function renderTop() {
 }
 
 function renderLeft() {
-  if (!changed("left", [S.problem, S.path])) return;
+  if (!changed("left", [S.problem, S.path, S.ready])) return;
   const left = $("left");
   if (!S.problem) {
-    left.innerHTML = `<span class="eyebrow">Problema atual</span><h2>Nenhum ainda</h2>
+    /* problemas já entendidos e reconhecidos em outra sessão (ex.: pelo celular), prontos para codar */
+    const ready = S.ready.length
+      ? `<span class="eyebrow">Prontos para codar</span>
+      <div class="seqs">${S.ready.map(r => `<div class="seq"><div><b>${esc(label(r.n))}</b>${r.strategy ? `<span>${inline(r.strategy)}</span>` : ""}</div><button class="btn primary" type="button" data-ready="${r.n}">Codar</button></div>`).join("")}</div>`
+      : "";
+    left.innerHTML = `${ready}<span class="eyebrow"${ready ? ' style="margin-top:6px"' : ""}>Problema atual</span><h2>Nenhum ainda</h2>
       <form id="pick" style="display:grid;gap:10px">
         <label class="muted" for="psel" style="font-size:13.5px">Qual problema você vai atacar?</label>
         <select id="psel" name="problem">${PROBLEMS.map((t, i) => `<option value="${i + 1}">${esc(label(i + 1))}</option>`).join("")}</select>
@@ -268,6 +273,12 @@ function renderLeft() {
     left.querySelectorAll("[data-seq]").forEach(b => b.addEventListener("click", async () => {
       const s = SEQS[+b.dataset.seq];
       const ok = await send(`I want to do the sequence ${s.ids.map(label).join(" → ")} (${s.t}). Start with the first one, Understand phase.`, "choice", { question: "pick-problem", answer: s.ids });
+      b.textContent = ok ? "Enviado" : "Falhou";
+      poll();
+    }));
+    left.querySelectorAll("[data-ready]").forEach(b => b.addEventListener("click", async () => {
+      const n = +b.dataset.ready;
+      const ok = await send(`I'll resume ${label(n)} from the ready list. Start the Code phase with me.`, "choice", { question: "resume-ready", answer: n });
       b.textContent = ok ? "Enviado" : "Falhou";
       poll();
     }));
@@ -302,7 +313,7 @@ function renderFeedback() {
 }
 
 function renderAll(first) {
-  S.feedback = S.feedback || []; S.path = S.path || []; S.thread = S.thread || [];
+  S.feedback = S.feedback || []; S.path = S.path || []; S.thread = S.thread || []; S.ready = S.ready || [];
   renderTop(); renderLeft(); renderChat(first); renderFeedback();
 }
 

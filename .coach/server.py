@@ -2,6 +2,7 @@
 
 state.json    - written only by the coach (phase, problem, path, question, feedback, solved)
 thread.jsonl  - written only by this server, append-only: the user's POST /api/msg and the coach's POST /api/say
+ready/PNNN.json - problems understood and recognized elsewhere (e.g. from the phone), ready to code; served as state.ready
 GET  /               the built page with state + thread injected into #state
 GET  /api/state      {rev, state, thread}; the page polls it and redraws only the regions that changed
 POST /api/msg        the user's message from the page   {text, tag, data}
@@ -21,6 +22,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATE = os.path.join(HERE, "state.json")
 THREAD = os.path.join(HERE, "thread.jsonl")
+READY = os.path.join(HERE, "ready")
 PAGE = os.path.join(HERE, "dist", "coach.html")
 PORT = int(os.environ.get("COACH_PORT", "4400"))
 URL = f"http://127.0.0.1:{PORT}"
@@ -54,6 +56,27 @@ def read_thread():
     return out
 
 
+def read_ready():
+    out = []
+    try:
+        names = sorted(n for n in os.listdir(READY) if re.fullmatch(r"P\d{3}\.json", n))
+    except OSError:
+        return out
+    for name in names:
+        try:
+            with open(os.path.join(READY, name), encoding="utf-8") as f:
+                item = json.load(f)
+            if isinstance(item, dict) and isinstance(item.get("n"), int):
+                out.append(item)
+        except (OSError, ValueError):
+            pass  # a half-written or broken file is skipped, not fatal
+    return out
+
+
+def full_state():
+    return dict(read_state(), ready=read_ready())
+
+
 def rev():
     def sig(p):
         try:
@@ -61,7 +84,11 @@ def rev():
             return f"{st.st_mtime_ns}.{st.st_size}"
         except OSError:
             return "0"
-    return sig(STATE) + "-" + sig(THREAD)
+    try:
+        ready = "-".join(sig(os.path.join(READY, n)) for n in sorted(os.listdir(READY)))
+    except OSError:
+        ready = "0"
+    return sig(STATE) + "-" + sig(THREAD) + "-" + ready
 
 
 def append(msg):
@@ -73,7 +100,7 @@ def append(msg):
 def page():
     with open(PAGE, encoding="utf-8") as f:
         html = f.read()
-    state = dict(read_state(), thread=read_thread())
+    state = dict(full_state(), thread=read_thread())
     blob = json.dumps(state, ensure_ascii=False).replace("</", "<\\/")
     return re.sub(r'(<script type="application/json" id="state">).*?(</script>)',
                   lambda m: m.group(1) + "\n" + blob + "\n" + m.group(2), html, count=1, flags=re.S)
@@ -104,7 +131,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/health":
             return self._send(200, '{"ok":true}')
         if path == "/api/state":
-            return self._send(200, json.dumps({"rev": rev(), "state": read_state(), "thread": read_thread()}, ensure_ascii=False))
+            return self._send(200, json.dumps({"rev": rev(), "state": full_state(), "thread": read_thread()}, ensure_ascii=False))
         if path in ("/", "/index.html"):
             try:
                 return self._send(200, page(), "text/html; charset=utf-8")

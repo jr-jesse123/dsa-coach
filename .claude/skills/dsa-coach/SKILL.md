@@ -1,6 +1,6 @@
 ---
 name: dsa-coach
-description: Start (or resume) the DSA study session for this repo - starts the local coach server (chat page), opens the pattern tree in Lavish, arms the save-watcher, chat-inbox and Lavish monitors, and applies the agreed Socratic coaching loop. Use when the user says /dsa-coach, "vamos estudar", or starts working on a TopCoding problem.
+description: Start (or resume) the DSA study session for this repo, on the PC or from the phone - starts the local coach server (chat page), opens the pattern tree in Lavish, arms the save-watcher, chat-inbox and Lavish monitors, and applies the agreed Socratic coaching loop. Use when the user says /dsa-coach, "vamos estudar", or starts working on a TopCoding problem.
 ---
 
 # DSA coach session
@@ -8,6 +8,8 @@ description: Start (or resume) the DSA study session for this repo - starts the 
 The user studies DSA here in C# (Visual Studio). You coach them Socratically through a pattern decision tree. Coach in English (interview tone), even when the user writes in Portuguese, unless they ask to switch back.
 
 ## 1. Start the environment (every session)
+
+**On the phone or in a cloud session** (the user says they are on the phone, or the machine is not their Windows PC with Visual Studio, e.g. claude.ai/code): skip this section and follow section 5, Mobile mode.
 
 Run these from the repo root (the folder that holds `TopCoding.sln`; all paths below are relative to it):
 
@@ -21,7 +23,10 @@ Run these from the repo root (the folder that holds `TopCoding.sln`; all paths b
    - `bash .coach/watch-solutions.sh`: `changed: PNNN_Name/Solution.cs (N lines) @ hh:mm:ss`.
 4. **Re-arm on expiry:** the monitors expire after 30 min. Re-arm on every expiry notice without asking. A poll that ends with `browser_disconnected` means the Lavish window was closed: ask before reopening.
    - Orphaned watcher processes from dead sessions pile up and burn CPU. Before arming, list them with `Get-CimInstance Win32_Process` (command lines matching `inbox-watch|watch-solutions|lavish-poll`) and stop them, so each monitor runs once.
-5. **Read the state:** read `.coach/state.json` and the tail of `.coach/thread.jsonl` to see where the user left off. Then greet them briefly with that context.
+5. **Bring in the phone's work:** run `git fetch origin`. If `origin/mobile` has commits that `main` lacks, show the user `git diff main...origin/mobile --stat` and a short summary of each new or changed `.coach/ready/` file.
+   - Anything outside `.coach/ready/` on that branch is unexpected: say so, and never bring it in.
+   - Only after the user agrees, take the ready files alone: `git restore --source=origin/mobile -- .coach/ready/`, then commit on `main`.
+6. **Read the state:** read `.coach/state.json` and the tail of `.coach/thread.jsonl` to see where the user left off. Then greet them briefly with that context, including any problems waiting under `.coach/ready/`.
 
 ## 2. The two pages
 
@@ -83,6 +88,7 @@ Rules for the chat:
 ## 3. The coaching loop (agreed with the user)
 
 1. **Escolher.** The user picks a problem, on the page or in chat. Set `problem` and set `phase: understand`.
+   - **Resuming a ready problem** (`data.question: "resume-ready"`, or the user names one under `.coach/ready/`): read `.coach/ready/PNNN.json`, set `problem`, copy its `path` into `state.json` and set `phase: code`. In the chat, recap `understood` and `strategy` in two or three lines and start from `open`; ask them to restate the strategy before they type.
 2. **Entender.** Understand the concrete problem before any talk of patterns, data structures or complexity. Ask, don't tell:
    - Restate it in their own words: what comes in, what goes out, what is guaranteed.
    - Trace one statement example by hand, step by step, and check the expected output.
@@ -112,7 +118,7 @@ Rules for the chat:
      - why their solution works (the invariant);
      - for each neighbouring approach (start from the pattern's Fronteiras), why it fails here, ideally with a tiny counterexample you verify by running it;
      - when the neighbour would be the right choice.
-   - When the bridge is agreed, append it to `solved` as `{n, title, leaf, works, nb}`.
+   - When the bridge is agreed, append it to `solved` as `{n, title, leaf, works, nb}`. If the problem came from `.coach/ready/`, delete its file in the same commit.
    - If the problem fits no leaf well, propose a tree extension (new node or leaf, plus its Fronteiras) and make it only with the user's agreement.
 
 Hard rules:
@@ -127,6 +133,20 @@ Hard rules:
 - `TopCoding.Array/Problems/PNNN_Name/`: `Solution.cs` (the user's code), `PNNN_NameTests.cs`, and `PNNN_Name.md` (the statement).
 - `TopCoding.Array/TestData/PNNNData.cs`: hidden xunit MemberData.
 - `.coach/`: page template, tree source (canonical copy of the artifact), build script, `verify_bounds.py`, `server.py`, `say.py`, `state.json`, `thread.jsonl`, monitor scripts (`inbox-watch.sh`, `lavish-poll.sh`, `watch-solutions.sh`).
-- Git (local only, never push: the test data is spoilers): tag `baseline-two-pages` marks the tooling before the needs-first tree; work happens on branch `needs-first-tree`. Commit tooling changes (`.coach/`, `.claude/`) before and after risky edits, and restore a file with `git restore --source=baseline-two-pages <path>`. `.gitattributes` pins the tooling to LF, because bash scripts break with CRLF.
+- `.coach/ready/PNNN.json`: problems understood and recognized from the phone, waiting to be coded. The format is in `.coach/ready/README.md`; the server serves them as `state.ready`.
+- Git: `origin` is the user's GitHub repo. From the PC, push `main` only when the user asks; the phone pushes only branch `mobile` (section 5). Tag `baseline-two-pages` marks the tooling before the needs-first tree. Commit tooling changes (`.coach/`, `.claude/`) before and after risky edits, and restore a file with `git restore --source=baseline-two-pages <path>`. `.gitattributes` pins the tooling to LF, because bash scripts break with CRLF.
 - `.lavish/tree.html`: the built tree page, opened in Lavish (generated, git-ignored).
 - `.coach/dist/coach.html`: the built coach page, served by `server.py`. (`.lavish/coach.html` is an obsolete leftover.)
+
+## 5. Mobile mode (phone or cloud session)
+
+Only the Understand and Recognize phases happen here. There is no coach server, page, Lavish, monitor or `dotnet`: the conversation is the chat itself. Coach in English, as on the PC.
+
+1. **Branch first:** `git fetch origin`, then `git checkout mobile` (create it with `git checkout -b mobile origin/main` if it doesn't exist) and `git merge origin/main`, so `solved` and the tree are current. Never commit to or push `main`.
+2. **Read, don't write:** read `.coach/state.json` to learn what is solved and which problem is active on the PC. Read the problem's `.md` statement, and `.coach/ready/` for work already started. Ask before taking the PC's active problem.
+3. **The tree:** send the user the study tree, https://claude.ai/artifact/CQZnWJAXZRTCL9GpFSuKc3, and steer from `.coach/tree-source.html` read as text (`N` for questions, `D` for criteria, `P` and `F` for the cards and Fronteiras).
+   - The user names the options they pick. You quote node questions and options as needed.
+   - Never reveal which pattern an unsolved one of the 47 falls under. That includes the classics lists in `P`, whose 47 entries the study tree hides.
+4. **Coach** sections 3.2 and 3.3 exactly as on the PC: understand first, then both readings and the confrontation. Stop when both readings agree and the strategy is settled. Never write code, and don't drift into implementation details.
+5. **Save:** write only `.coach/ready/PNNN.json`, in the format of `.coach/ready/README.md`, with the user's own wording for `strategy`. Commit it and `git push origin mobile`. Save at the end, and also whenever the user stops mid-way, with what is still unresolved in `open`.
+6. **Never touch** `state.json`, `thread.jsonl`, any `Solution.cs`, the tree source, the template or this skill. The hard rules of section 3 apply, including hidden test data: never open `TopCoding.Array/TestData/`.
