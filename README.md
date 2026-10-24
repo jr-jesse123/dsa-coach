@@ -46,6 +46,21 @@ Para conferir:
 git --version; node --version; python --version; dotnet --version; lavish-axi --help
 ```
 
+### Se o Claude Code não acha `python`, `node` ou `lavish-axi`
+
+Os três podem estar instalados e mesmo assim não aparecer no shell do Claude Code (o Bash dá `command not found`). Isso acontece quando o PATH do usuário não tem as pastas deles, ou quando o Claude Code foi aberto antes da instalação. Ponha as três pastas no PATH do usuário:
+
+```powershell
+$add = "$env:LOCALAPPDATA\Programs\Python\Python312;$env:ProgramFiles\nodejs;$env:APPDATA\npm"
+[Environment]::SetEnvironmentVariable('Path', "$add;" + [Environment]::GetEnvironmentVariable('Path','User'), 'User')
+```
+
+Depois reinicie o Claude Code. Para a sessão atual, sem reiniciar, dá para prefixar cada comando no Bash:
+
+```bash
+export PATH="/c/Users/$USERNAME/AppData/Local/Programs/Python/Python312:/c/Program Files/nodejs:/c/Users/$USERNAME/AppData/Roaming/npm:$PATH"
+```
+
 ## Uso
 
 No Claude Code, a partir da raiz do repo (a pasta com `TopCoding.sln`):

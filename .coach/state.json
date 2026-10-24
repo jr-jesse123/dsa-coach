@@ -1,8 +1,8 @@
 {
   "phase": "recognize",
-  "problem": 3,
+  "problem": 4,
   "path": [],
-  "question": "Constraints ruler: what does a fixed 9x9 board allow? Then: what is the input shape?",
+  "question": "Ruler: n up to 10^4, which complexities fit, is O(n^2) safe?",
   "feedback": [
     {
       "verdict": "Good start, still a skeleton",
@@ -31,6 +31,62 @@
       "file": "Solution.cs",
       "time": "08:42",
       "text": "All P002 tests pass, and the left branch is now correct (`<=` at its left end, `<` at `mid`).\n\nThe right branch still has a strict `<` at `nums[rightIdx]`. A brute force over every rotation of arrays up to length 8 finds inputs that return `-1` for a target that is present, for example `[2,0,1]` with target `1`."
+    },
+    {
+      "verdict": "Right plan, check bounds and keys",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "19:23",
+      "text": "Three sets and one nested pass over the board: the agreed plan.\n\nTrace the loop's first cell: are all 81 visited? On line 15, which group does `(value, row)` identify, and what does `Add` return compared with the name `repeated`?"
+    },
+    {
+      "verdict": "Box key never collides",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "19:24",
+      "text": "All three sets are filled now.\n\nCan two different cells ever produce the box key `(value, row, col)`? And with `repeated` reassigned three times, what is left of lines 15 and 16 by line 17?"
+    },
+    {
+      "verdict": "Repeat check is right now",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "19:25",
+      "text": "`!Add(...)` combined with `||` is the right meaning for `repeated`, and short-circuiting is harmless.\n\nStill open: the loop bounds and the box key. New: what happens on the second `'.'` of a row?"
+    },
+    {
+      "verdict": "Complete shape, three points open",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "19:26",
+      "text": "Early exit on the first repeat and `return true` at the end are right.\n\nStill open: the first cell read, the box key, and the second `'.'` of a row."
+    },
+    {
+      "verdict": "Empty cells handled",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "19:27",
+      "text": "Skipping `'.'` before any `Add` is right, and the `char` keys read more cleanly.\n\nDelete the unused `using Newtonsoft.Json.Linq;`. Still open: the loop bounds and the box key."
+    },
+    {
+      "verdict": "Bounds shifted the wrong way",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "19:28",
+      "text": "With `row = 1; row <= board.Length`, list the values `row` takes. What is the last valid index of a 9-element array, and is index 0 ever read?"
+    },
+    {
+      "verdict": "Bounds fixed, box key left",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "19:32",
+      "text": "`0` to `< Length` visits all 81 cells now.\n\nLast one: two `5`s at `(0, 0)` and `(1, 1)` share a box. Which keys does `squareSet` get for them, and are they equal?"
+    },
+    {
+      "verdict": "Tests green",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "19:34",
+      "text": "All P003 tests pass. `row / 3, col / 3` was the last piece.\n\nNow justify: the invariant, and complexity for an n × n board."
     }
   ],
   "solved": [
@@ -55,6 +111,58 @@
         {
           "name": "mover a parede maior",
           "why": "Pula pares sem teto de altura e perde a resposta: em [1,8,6,2,5,4,8,3,7] dá 8 em vez de 49."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Search in Rotated Sorted Array",
+      "leaf": "binsearch",
+      "works": "Se o alvo existe, ele está em [left..right] (inclusivo). A cada passo uma das metades está ordenada, e nums[left] <= nums[mid] diz qual. Uma metade ordenada dá um intervalo exato de valores, então dá para descartar a metade que não pode conter o alvo, e o mid junto. O(log n) de tempo, O(1) de espaço.",
+      "nb": [
+        {
+          "name": "hash set",
+          "why": "Gasta O(n) para montar e ignora a ordem, então não alcança O(log n)."
+        },
+        {
+          "name": "varredura linear",
+          "why": "O(n), e desperdiça a ordem que o array ainda tem."
+        },
+        {
+          "name": "dois ponteiros",
+          "why": "Compara as duas pontas e descarta fileiras de pares. Aqui se procura uma posição, comparando o meio com o alvo."
+        },
+        {
+          "name": "com duplicados",
+          "why": "nums[left] == nums[mid] deixa de provar que a parte está ordenada: [1, 0, 1, 1, 1] perde o 0."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Valid Sudoku",
+      "leaf": "hash",
+      "works": "Cada um dos 27 grupos (9 linhas, 9 colunas, 9 caixas) é só um saco de valores: a ordem e a vizinhança não importam. Três HashSet com chaves compostas, (valor, linha), (valor, coluna) e (valor, r/3, c/3), lembram o que já foi visto. A segunda cópia de qualquer dígito repetido encontra a chave da primeira, e Add devolve false. Uma passada: O(N) no número de células, O(1) no 9 × 9 fixo.",
+      "nb": [
+        {
+          "name": "grid (BFS/DFS)",
+          "why": "A validade nunca exige andar entre vizinhos: embaralhe as células de um grupo e a resposta não muda."
+        },
+        {
+          "name": "comparar todos com todos",
+          "why": "Passa no 9 × 9 (~1.000 comparações), mas recompara cada valor com todos os anteriores em vez de lembrá-los."
+        },
+        {
+          "name": "bool[9] ou bitmask",
+          "why": "Também funciona: os valores são só 1–9, então '7' - '1' já é um índice. Mais barato que hash."
+        },
+        {
+          "name": "backtracking",
+          "why": "É a troca quando pedem para resolver o tabuleiro (um arranjo válido). Os mesmos conjuntos viram o teste O(1) de cada tentativa."
+        },
+        {
+          "name": "programação dinâmica",
+          "why": "Não há ótimo nem contagem, e o mesmo tabuleiro parcial praticamente nunca volta."
         }
       ]
     }
