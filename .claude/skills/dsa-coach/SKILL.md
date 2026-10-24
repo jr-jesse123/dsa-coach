@@ -22,6 +22,7 @@ Run these from the repo root (the folder that holds `TopCoding.sln`; all paths b
    - `bash .coach/lavish-poll.sh`: feedback from the tree page, i.e. anchored questions (`selector` points at the exact node or term) and the tree's "send path" / "I'm stuck" buttons (`tag: tree-path`). Its first poll uses `--takeover`, so an orphaned poll cannot block it.
    - `bash .coach/watch-solutions.sh`: `changed: PNNN_Name/Solution.cs (N lines) @ hh:mm:ss`.
 4. **Re-arm on expiry:** the monitors expire after 30 min. Re-arm on every expiry notice without asking. A poll that ends with `browser_disconnected` means the Lavish window was closed: ask before reopening.
+   - A re-armed inbox monitor reports only lines written after it starts. Right after re-arming it, read the tail of `.coach/thread.jsonl` and answer any `"from":"you"` message newer than your last reply.
    - Orphaned watcher processes from dead sessions pile up and burn CPU. Before arming, list them with `Get-CimInstance Win32_Process` (command lines matching `inbox-watch|watch-solutions|lavish-poll`) and stop them, so each monitor runs once.
 5. **Bring in the phone's work:** run `git fetch origin`. If `origin/mobile` has commits that `main` lacks, show the user `git diff main...origin/mobile --stat` and a short summary of each new or changed `.coach/ready/` file.
    - Anything outside `.coach/ready/` on that branch is unexpected: say so, and never bring it in.
