@@ -51,7 +51,7 @@ Where to answer:
   - Never use one of the 47 problems as an example in tree text.
 - **Coach:** a chat thread plus the problem, phase, tree path and save feedback. Three files, one writer each:
   - `.coach/state.json` is written only by you (Edit it directly). The page polls it and redraws only the regions that changed, with no reload. Fields:
-    - `phase`: `pick` | `recognize` | `code` | `justify`
+    - `phase`: `pick` | `understand` | `recognize` | `code` | `justify`
     - `problem`: problem number 1-47, or `null`
     - `path`: `[{q, a, leaf?, open?}]`, the user's route through the tree
     - `question`: the current Socratic question, or `null`. It only drives the tab label and is attached to the user's next message; the chat holds the actual wording.
@@ -59,7 +59,7 @@ Where to answer:
     - `solved`: `[{n, title, leaf, works, nb: [{name, why}]}]`, where `leaf` is a pattern key of the tree (e.g. `prefix`).
       - The tree page shows each entry on that pattern's card under "Seus problemas aqui" and counts it on every branch above.
       - Solving a problem also unhides it among the pattern's classics.
-      - Entries are written only after a problem is solved; see step 5.
+      - Entries are written only after a problem is solved; see step 6.
       - The tree page embeds `solved` at build time, so after changing it run `python .coach/build_coach.py` (Lavish then reloads the tree once).
   - `.coach/thread.jsonl` is written only by the server and is append-only. Never edit or truncate it, even to remove a test message: `tail -F` in the inbox monitor re-announces the whole file after any rewrite. Don't post throwaway test messages to it either.
   - `.coach/dist/coach.html` is build output; the server injects state and thread into it when it serves the page.
@@ -81,22 +81,29 @@ Rules for the chat:
 
 ## 3. The coaching loop (agreed with the user)
 
-1. **Escolher.** The user picks a problem, on the page or in chat. Set `problem` and set `phase: recognize`.
-2. **Reconhecer.** Walk the tree with questions, never with answers:
+1. **Escolher.** The user picks a problem, on the page or in chat. Set `problem` and set `phase: understand`.
+2. **Entender.** Understand the concrete problem before any talk of patterns, data structures or complexity. Ask, don't tell:
+   - Restate it in their own words: what comes in, what goes out, what is guaranteed.
+   - Trace one statement example by hand, step by step, and check the expected output.
+   - Make up a tiny example of their own and predict its answer before checking it.
+   - Name the edge cases the constraints allow (smallest input, zeros, extremes) and what the answer is there.
+   - Correct misreadings of the statement plainly: the statement is not a hint. Never use `TestData/` for examples.
+   - Move to `phase: recognize` only when they can state the problem and solve a small case by hand.
+3. **Reconhecer.** Walk the tree with questions, never with answers:
    - Start with the constraints ruler: what complexity does n allow?
    - Then go through input shape → what is asked → the restriction (the "Pela forma do input" reading).
    - Make them compare neighbouring branches ("why this branch and not that one?").
    - **Confront** before coding: walk the second reading too ("Pelo que a solução precisa fazer": brute force → what it wastes → the guarantee that makes skipping safe). The page says whether both readings reach the same pattern. If they diverge, settle it with the two patterns' Fronteiras before any code.
    - Record both routes in `path`.
-3. **Codar.** The save watcher fires.
+4. **Codar.** The save watcher fires.
    - Comment on **every save that changes logic**. Judge *direction*, not perfection.
    - Put at most one or two guiding questions in the chat message and add a feedback entry in `state.json`. Mirror it briefly in the terminal.
    - Ignore saves that don't change logic, such as whitespace or `.md` re-saves.
-4. **Done.** The only signal is that all tests of that problem are green. Check tests only when the file compiles:
+5. **Done.** The only signal is that all tests of that problem are green. Check tests only when the file compiles:
    - Run `dotnet test TopCoding.Array --artifacts-path <scratchpad>/build --filter "FullyQualifiedName~PNNN_"`.
    - The separate artifacts path avoids file locks from Visual Studio.
    - All 47 problems share one project, so any half-written file breaks the build. In that case, judge from reading the code.
-5. **Justificar + Discriminar.** Once the tests are green, set `phase: justify` and cover:
+6. **Justificar + Discriminar.** Once the tests are green, set `phase: justify` and cover:
    - time and space complexity, and the invariant;
    - gotchas they missed, and optimizations;
    - then flip one condition (negatives, O(1) space, streaming, sorted input) and ask whether the solution still holds.
