@@ -19,6 +19,8 @@ public class Solution
 
             var bestOptIdx = options.MaxBy(o => o.idx + currIdx + 1 == nums.Length - 1 ? int.MaxValue: o.weight)!.idx + 1;
 
+
+            
             
 
             currIdx = currIdx + bestOptIdx;

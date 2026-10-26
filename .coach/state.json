@@ -1,35 +1,8 @@
 {
-  "phase": "justify",
-  "problem": 4,
-  "path": [
-    {
-      "q": "Qual é a forma principal do input?",
-      "a": "Array ou string"
-    },
-    {
-      "q": "O que o enunciado pede sobre o array/string?",
-      "a": "Um ótimo (máx/mín): o mínimo de saltos, e cada escolha afeta as próximas"
-    },
-    {
-      "q": "Programação dinâmica: qual é o formato do estado?",
-      "a": "Na verdade a melhor escolha local nunca precisa ser desfeita: pousar no j que maximiza j + nums[j]",
-      "leaf": "greedy"
-    },
-    {
-      "q": "Que trabalho a solução precisa fazer, que a força bruta repete ou faz às cegas?",
-      "a": "Descartar candidatos sem testá-los (tentar todas as rotas é exponencial)"
-    },
-    {
-      "q": "O que garante que o descarte é seguro?",
-      "a": "A melhor escolha local nunca precisa ser desfeita"
-    },
-    {
-      "q": "Qual é a escolha local?",
-      "a": "Outra regra local: pousar no j que maximiza j + nums[j]",
-      "leaf": "greedy"
-    }
-  ],
-  "question": "What is the time complexity, and what invariant makes the greedy choice safe?",
+  "phase": "pick",
+  "problem": null,
+  "path": [],
+  "question": null,
   "feedback": [
     {
       "verdict": "Good start, still a skeleton",
@@ -386,6 +359,26 @@
         {
           "name": "programação dinâmica",
           "why": "Não há ótimo nem contagem, e o mesmo tabuleiro parcial praticamente nunca volta."
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Jump Game II",
+      "leaf": "greedy",
+      "works": "Pode-se saltar qualquer distância de 1 a nums[i], então o que se alcança a cada rodada é um prefixo sem buracos. Pousar no j que maximiza j + nums[j] leva à fronteira mais distante da próxima rodada, e tudo antes de j já estava coberto: nenhum outro pouso faz melhor. Se o fim está entre os pousos, ele vence direto. Cada índice é lido no máximo duas vezes: O(n) de tempo.",
+      "nb": [
+        {
+          "name": "programação dinâmica 1D",
+          "why": "Também acerta: dp[i] = 1 + min sobre todo k que alcança i. Mas testa todas as opções, O(n²) no pior caso, quando o guloso já sabe qual vence. É a troca quando a regra de salto abre buracos (ex.: só 1 passo ou exatamente nums[i]), como em [2, 3, 0, 0]."
+        },
+        {
+          "name": "BFS (menor caminho sem peso)",
+          "why": "Também acerta: cada camada é o que se alcança com t saltos. Como cada camada é um intervalo, basta guardar a borda direita, e o BFS vira o guloso. Também é a troca quando há buracos."
+        },
+        {
+          "name": "ordenar candidatos",
+          "why": "Desnecessário: empates de alcance são equivalentes, e ordenar cada janela custa O(n log n)."
         }
       ]
     }
