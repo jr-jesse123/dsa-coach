@@ -109,6 +109,26 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
 #tab-coach .seq { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 #tab-coach .seq b { font-weight: 600; }
 #tab-coach .seq span { display: block; font-size: 13px; color: var(--muted); }
+/* blocos visuais nas mensagens */
+#tab-coach .msg .arr, #tab-coach .fb-item .arr, #tab-coach .tbl, #tab-coach .mmd, #tab-coach pre.blk { overflow-x: auto; max-width: 100%; }
+#tab-coach .arr { display: grid; gap: 10px; padding: 4px 0; }
+#tab-coach .arr-step { display: grid; gap: 2px; justify-content: start; }
+#tab-coach .arr-label { font-size: 13px; font-weight: 600; }
+#tab-coach .arr-row { display: grid; gap: 3px; }
+#tab-coach .arr-row > span { text-align: center; }
+#tab-coach .arr-row.idx > span { font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); }
+#tab-coach .arr-row.ptr > span { font-family: var(--f-mono); font-size: 11px; color: var(--accent); line-height: 1.2; }
+#tab-coach .cell { font-family: var(--f-mono); font-size: 14px; padding: 5px 6px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--surface); }
+#tab-coach .cell.in { background: var(--accent-soft); border-color: var(--accent); }
+#tab-coach .cell.dim { opacity: .4; }
+#tab-coach .cell.good { background: var(--leaf-soft); border-color: var(--leaf); color: var(--leaf); font-weight: 600; }
+#tab-coach .cell.bad { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); font-weight: 600; }
+#tab-coach .tbl table { border-collapse: collapse; font-size: 13.5px; }
+#tab-coach .tbl th, #tab-coach .tbl td { border: 1px solid var(--line); padding: 4px 9px; text-align: left; white-space: nowrap; }
+#tab-coach .tbl th { background: var(--bg); font-weight: 600; }
+#tab-coach pre.blk { margin: 0; background: var(--code-bg); border-radius: 8px; padding: 8px 10px; }
+#tab-coach pre.blk code { background: none; padding: 0; overflow-wrap: normal; }
+#tab-coach .mmd svg { max-width: 100%; height: auto; }
 #tab-coach .empty { border: 1px dashed var(--line); border-radius: 10px; padding: 14px; color: var(--muted); font-size: 14px; }
 
 /* ---------- aba Árvore (CSS do artifact do usuário, escopado) ---------- */
@@ -291,7 +311,105 @@ function renderLeft() {
   }
 }
 
-const para = t => t.split("\n\n").map(p => `<p>${inline(p)}</p>`).join("");
+/* mensagens: parágrafos + blocos visuais (```array, ```mermaid, tabelas com |) */
+const parseRange = v => { const m = /^(-?\d+)\.\.(-?\d+)$/.exec(v); return m ? [+m[1], +m[2]] : null; };
+const parseIdx = v => v.split(",").map(Number).filter(Number.isInteger);
+function arrayBlock(body) {
+  const lines = body.split("\n").filter(l => l.trim());
+  let vals;
+  try { vals = JSON.parse(lines[0]); } catch (e) { vals = lines[0].replace(/^\[|\]$/g, "").split(",").map(s => s.trim()); }
+  if (!Array.isArray(vals)) return `<pre class="blk"><code>${esc(body)}</code></pre>`;
+  const n = vals.length;
+  const rows = (lines.length > 1 ? lines.slice(1) : [""]).map(l => {
+    const r = { label: "", range: [], dim: [], good: [], bad: [], ptr: {} };
+    const li = l.indexOf("label=");
+    if (li >= 0) { r.label = l.slice(li + 6).trim().replace(/^"|"$/g, ""); l = l.slice(0, li); }
+    for (const tok of l.trim().split(/\s+/).filter(Boolean)) {
+      const [k, v = ""] = tok.split("=");
+      if (k === "range" || k === "dim") { const rg = parseRange(v); if (rg) r[k].push(rg); }
+      else if (k === "good" || k === "bad") r[k].push(...parseIdx(v));
+      else if (/^-?\d+$/.test(v)) (r.ptr[+v] = r.ptr[+v] || []).push(k);
+    }
+    return r;
+  });
+  const inR = (rs, i) => rs.some(([a, b]) => i >= a && i <= b);
+  /* largura fixa por coluna, igual em todas as linhas, para os índices e ponteiros alinharem */
+  const w = Math.max(34, 14 + 9 * Math.max(...vals.map(v => String(typeof v === "object" ? JSON.stringify(v) : v).length)));
+  const cols = `style="grid-template-columns:repeat(${n},${w}px)"`;
+  const idxRow = `<div class="arr-row idx" ${cols}>${vals.map((_, i) => `<span>${i}</span>`).join("")}</div>`;
+  return `<div class="arr">${rows.map(r => {
+    const cells = vals.map((v, i) => {
+      const c = ["cell"];
+      if (inR(r.range, i)) c.push("in");
+      if (inR(r.dim, i)) c.push("dim");
+      if (r.good.includes(i)) c.push("good");
+      if (r.bad.includes(i)) c.push("bad");
+      return `<span class="${c.join(" ")}">${esc(typeof v === "object" ? JSON.stringify(v) : v)}</span>`;
+    }).join("");
+    const hasPtr = Object.keys(r.ptr).length;
+    const ptrs = hasPtr ? `<div class="arr-row ptr" ${cols}>${vals.map((_, i) => `<span>${r.ptr[i] ? "▲<br>" + r.ptr[i].map(esc).join("<br>") : ""}</span>`).join("")}</div>` : "";
+    return `<div class="arr-step">${r.label ? `<div class="arr-label">${inline(r.label)}</div>` : ""}${idxRow}<div class="arr-row" ${cols}>${cells}</div>${ptrs}</div>`;
+  }).join("")}</div>`;
+}
+function tableBlock(lines) {
+  const cells = l => l.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+  const body = lines.filter(l => !/^\s*\|?[\s:|-]+\|?\s*$/.test(l));
+  const [head, ...rest] = body;
+  return `<div class="tbl"><table><thead><tr>${cells(head).map(c => `<th>${inline(c)}</th>`).join("")}</tr></thead><tbody>${rest.map(r => `<tr>${cells(r).map(c => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function para(t) {
+  const out = [], lines = t.split("\n");
+  let buf = [];
+  const flush = () => { const p = buf.join("\n").trim(); if (p) out.push(`<p>${inline(p)}</p>`); buf = []; };
+  for (let i = 0; i < lines.length; i++) {
+    const fence = /^```(\w*)\s*$/.exec(lines[i]);
+    if (fence) {
+      flush();
+      const body = [];
+      for (i++; i < lines.length && !/^```\s*$/.test(lines[i]); i++) body.push(lines[i]);
+      const src = body.join("\n");
+      if (fence[1] === "array") out.push(arrayBlock(src));
+      else if (fence[1] === "mermaid") out.push(`<div class="mmd" data-src="${esc(src)}">${MMD.get(src) || `<pre class="blk"><code>${esc(src)}</code></pre>`}</div>`);
+      else out.push(`<pre class="blk"><code>${esc(src)}</code></pre>`);
+    } else if (/^\s*\|.*\|\s*$/.test(lines[i])) {
+      flush();
+      const tl = [];
+      for (; i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i]); i++) tl.push(lines[i]);
+      i--;
+      out.push(tableBlock(tl));
+    } else if (!lines[i].trim()) flush();
+    else buf.push(lines[i]);
+  }
+  flush();
+  return out.join("");
+}
+/* mermaid: carregado só quando aparece um bloco; SVG guardado por fonte para não redesenhar a cada poll */
+const MMD = new Map();
+let mmdLoad = null, mmdSeq = 0;
+function drawMermaid() {
+  const todo = [...document.querySelectorAll(".mmd")].filter(el => !MMD.has(el.dataset.src));
+  if (!todo.length) return;
+  mmdLoad = mmdLoad || new Promise((ok, fail) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js";
+    s.onload = () => {
+      const dark = getComputedStyle(document.documentElement).colorScheme.includes("dark");
+      window.mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "default", securityLevel: "strict" });
+      ok(window.mermaid);
+    };
+    s.onerror = fail;
+    document.head.appendChild(s);
+  });
+  mmdLoad.then(async m => {
+    for (const el of todo) {
+      const src = el.dataset.src;
+      if (MMD.has(src)) { el.innerHTML = MMD.get(src); continue; }
+      try { const { svg } = await m.render("mmd" + (++mmdSeq), src); MMD.set(src, svg); }
+      catch (e) { MMD.set(src, `<pre class="blk"><code>${esc(src)}</code></pre><div class="muted">diagrama inválido</div>`); }
+      document.querySelectorAll(".mmd").forEach(x => { if (x.dataset.src === src) x.innerHTML = MMD.get(src); });
+    }
+  }).catch(() => {});
+}
 function renderChat(first) {
   if (!changed("chat", S.thread)) return;
   const chat = $("chat");
@@ -314,7 +432,7 @@ function renderFeedback() {
 
 function renderAll(first) {
   S.feedback = S.feedback || []; S.path = S.path || []; S.thread = S.thread || []; S.ready = S.ready || [];
-  renderTop(); renderLeft(); renderChat(first); renderFeedback();
+  renderTop(); renderLeft(); renderChat(first); renderFeedback(); drawMermaid();
 }
 
 /* composer: estático, com rascunho guardado */
