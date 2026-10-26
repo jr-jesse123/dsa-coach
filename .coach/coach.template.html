@@ -109,6 +109,13 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
 #tab-coach .seq { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 #tab-coach .seq b { font-weight: 600; }
 #tab-coach .seq span { display: block; font-size: 13px; color: var(--muted); }
+/* painel esquerdo recolhido: vira uma faixa acima do chat, que ganha a largura toda */
+#tab-coach .grid.collapsed { grid-template-columns: minmax(0, 1fr); }
+#tab-coach .left-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+#tab-coach .left-head .btn, #tab-coach #left.mini .btn { font-size: 12.5px; padding: 4px 10px; }
+#tab-coach #left.mini { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 16px; }
+#tab-coach #left.mini .mini-t { font-family: var(--f-display); font-size: 16px; }
+#tab-coach #left.mini .btn { margin-left: auto; }
 /* blocos visuais nas mensagens */
 #tab-coach .msg .arr, #tab-coach .fb-item .arr, #tab-coach .tbl, #tab-coach .mmd, #tab-coach pre.blk { overflow-x: auto; max-width: 100%; }
 #tab-coach .arr { display: grid; gap: 10px; padding: 4px 0; }
@@ -266,9 +273,26 @@ function renderTop() {
     `<div class="phase${p.id === S.phase ? " on" : ""}"><span class="n">${i + 1}${p.id === S.phase ? " · agora" : ""}</span><span class="t">${p.t}</span><span class="d">${p.d}</span></div>`).join("");
 }
 
+/* painel "Problema atual" recolhível: útil ao navegar na árvore, ocupa espaço depois. A escolha fica no navegador. */
+let leftCollapsed = false;
+try { leftCollapsed = localStorage.getItem("coach-left-collapsed") === "1"; } catch (e) {}
+function toggleLeft() {
+  leftCollapsed = !leftCollapsed;
+  try { localStorage.setItem("coach-left-collapsed", leftCollapsed ? "1" : "0"); } catch (e) {}
+  renderLeft();
+}
 function renderLeft() {
-  if (!changed("left", [S.problem, S.path, S.ready])) return;
+  const mini = leftCollapsed && !!S.problem;
+  if (!changed("left", [S.problem, S.path, S.ready, mini])) return;
   const left = $("left");
+  left.closest(".grid").classList.toggle("collapsed", mini);
+  left.classList.toggle("mini", mini);
+  if (mini) {
+    const leaf = S.path.filter(p => p.leaf).pop();
+    left.innerHTML = `<span class="eyebrow">Problema atual</span><b class="mini-t">${esc(label(S.problem))}</b>${leaf ? `<span class="leafchip">${esc(leaf.leaf)}</span>` : ""}<button class="btn" type="button" id="left-toggle" aria-expanded="false">Mostrar caminho ▾</button>`;
+    $("left-toggle").addEventListener("click", toggleLeft);
+    return;
+  }
   if (!S.problem) {
     /* problemas já entendidos e reconhecidos em outra sessão (ex.: pelo celular), prontos para codar */
     const ready = S.ready.length
@@ -306,8 +330,9 @@ function renderLeft() {
     const crumbs = S.path.length
       ? `<ol class="crumbs">${S.path.map(p => `<li${p.open ? ' class="open"' : ""}><span class="cq">${esc(p.q)}</span><span class="ca">${p.leaf ? `<span class="leafchip">${esc(p.a)}</span>` : esc(p.a)}</span></li>`).join("")}</ol>`
       : `<div class="empty">O caminho aparece aqui conforme você percorre a árvore (aba ao lado) ou responde às perguntas.</div>`;
-    left.innerHTML = `<span class="eyebrow">Problema atual</span><h2>${esc(label(S.problem))}</h2>
+    left.innerHTML = `<div class="left-head"><span class="eyebrow">Problema atual</span><button class="btn" type="button" id="left-toggle" aria-expanded="true" title="Recolher este painel e dar a largura toda ao chat">Recolher ▴</button></div><h2>${esc(label(S.problem))}</h2>
       <span class="eyebrow" style="margin-top:4px">Caminho na árvore</span>${crumbs}`;
+    $("left-toggle").addEventListener("click", toggleLeft);
   }
 }
 
