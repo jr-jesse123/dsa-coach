@@ -385,7 +385,7 @@ function staticArray(spec) {
     return `<div class="arr-step">${r.label ? `<div class="arr-label">${inline(r.label)}</div>` : ""}${idxRow(spec)}<div class="arr-row" ${cols}>${cells}</div>${ptrs}</div>`;
   }).join("")}</div>`;
 }
-/* várias etapas: um player animado (◀ ▶ Play), que lembra a etapa mesmo quando o chat é redesenhado */
+/* várias etapas: um player animado (⏮ ◀ ▶), que lembra a etapa mesmo quando o chat é redesenhado */
 const ARR = new Map();
 function arrayBlock(body) {
   const spec = parseArray(body);
@@ -401,7 +401,7 @@ function drawPlayer(el) {
   if (!el.firstChild) {
     el.innerHTML = `<div class="arr-view"><div class="arr-label"></div><div class="arr-stage">${idxRow(spec)}<div class="arr-row cells" ${arrCols(spec)}>${spec.vals.map(v => `<span class="cell">${esc(v)}</span>`).join("")}</div><div class="arr-ptrs"></div></div></div>
       <div class="arr-all" hidden></div>
-      <div class="arr-ctl"><button class="btn" type="button" data-arr="prev" aria-label="Etapa anterior">◀</button><button class="btn" type="button" data-arr="play">▶ Play</button><button class="btn" type="button" data-arr="next" aria-label="Próxima etapa">▶</button><span class="arr-count"></span><button class="btn ghost" type="button" data-arr="all">Ver todas</button></div>`;
+      <div class="arr-ctl"><button class="btn" type="button" data-arr="home" aria-label="Voltar à primeira etapa">⏮ Início</button><button class="btn" type="button" data-arr="prev" aria-label="Etapa anterior">◀</button><button class="btn" type="button" data-arr="next" aria-label="Próxima etapa">▶</button><span class="arr-count"></span><button class="btn ghost" type="button" data-arr="all">Ver todas</button></div>`;
   }
   const n = spec.rows.length;
   st.step = Math.min(Math.max(st.step, 0), n - 1);
@@ -410,8 +410,8 @@ function drawPlayer(el) {
   all.hidden = !st.all;
   if (st.all && !all.firstChild) all.innerHTML = staticArray(spec);
   el.querySelector('[data-arr="all"]').textContent = st.all ? "Animar" : "Ver todas";
-  el.querySelectorAll('[data-arr="prev"],[data-arr="next"],[data-arr="play"]').forEach(b => b.disabled = st.all);
-  el.querySelector('[data-arr="play"]').textContent = st.timer ? "❚❚ Pausa" : "▶ Play";
+  el.querySelectorAll('[data-arr="home"],[data-arr="prev"]').forEach(b => b.disabled = st.all || st.step === 0);
+  el.querySelector('[data-arr="next"]').disabled = st.all || st.step === n - 1;
   el.querySelector(".arr-count").textContent = st.all ? `${n} etapas` : `${st.step + 1} / ${n}`;
   const r = spec.rows[st.step];
   el.querySelector(".arr-view > .arr-label").innerHTML = inline(r.label || "");
@@ -437,21 +437,12 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-arr]");
   if (!b) return;
   const el = b.closest(".arr-player"), key = el.dataset.key, st = ARR.get(key);
-  const n = JSON.parse(el.dataset.spec).rows.length;
-  const stop = () => { clearInterval(st.timer); st.timer = null; };
-  const redraw = () => document.querySelectorAll(".arr-player").forEach(x => { if (x.dataset.key === key) drawPlayer(x); });
   const act = b.dataset.arr;
-  if (act === "prev") { stop(); st.step--; }
-  else if (act === "next") { stop(); st.step++; }
-  else if (act === "all") { stop(); st.all = !st.all; }
-  else if (act === "play") {
-    if (st.timer) stop();
-    else {
-      if (st.step >= n - 1) st.step = 0;
-      st.timer = setInterval(() => { if (st.step >= n - 1) stop(); else st.step++; redraw(); }, 1600);
-    }
-  }
-  redraw();
+  if (act === "home") st.step = 0;
+  else if (act === "prev") st.step--;
+  else if (act === "next") st.step++;
+  else if (act === "all") st.all = !st.all;
+  document.querySelectorAll(".arr-player").forEach(x => { if (x.dataset.key === key) drawPlayer(x); });
 });
 function tableBlock(lines) {
   const cells = l => l.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
