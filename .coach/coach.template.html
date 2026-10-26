@@ -116,6 +116,18 @@ h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
 #tab-coach #left.mini { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 16px; }
 #tab-coach #left.mini .mini-t { font-family: var(--f-display); font-size: 16px; }
 #tab-coach #left.mini .btn { margin-left: auto; }
+#tab-coach .arr-player { display: grid; gap: 6px; padding: 4px 0; overflow-x: auto; max-width: 100%; }
+#tab-coach .arr-stage { display: grid; gap: 2px; justify-content: start; position: relative; }
+#tab-coach .arr-view > .arr-label { min-height: 1.5em; }
+#tab-coach .arr-ptrs { position: relative; transition: height .25s; }
+#tab-coach .arr-ptr { position: absolute; top: 0; transform: translateX(-50%); font-family: var(--f-mono); font-size: 11px; color: var(--accent); line-height: 1.2; text-align: center; white-space: nowrap; transition: left .45s ease, top .25s ease, opacity .25s; }
+#tab-coach .arr-player .cell { transition: background-color .35s, border-color .35s, color .35s, opacity .35s; }
+#tab-coach .arr-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+#tab-coach .arr-ctl .btn { font-size: 12.5px; padding: 3px 10px; }
+#tab-coach .arr-ctl .btn:disabled { opacity: .45; cursor: default; }
+#tab-coach .arr-ctl .btn.ghost { border-color: transparent; color: var(--muted); }
+#tab-coach .arr-count { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); min-width: 4.5em; }
+@media (prefers-reduced-motion: reduce) { #tab-coach .arr-ptr, #tab-coach .arr-player .cell { transition: none; } }
 /* blocos visuais nas mensagens */
 #tab-coach .msg .arr, #tab-coach .fb-item .arr, #tab-coach .tbl, #tab-coach .mmd, #tab-coach pre.blk { overflow-x: auto; max-width: 100%; }
 #tab-coach .arr { display: grid; gap: 10px; padding: 4px 0; }
@@ -339,12 +351,12 @@ function renderLeft() {
 /* mensagens: parágrafos + blocos visuais (```array, ```mermaid, tabelas com |) */
 const parseRange = v => { const m = /^(-?\d+)\.\.(-?\d+)$/.exec(v); return m ? [+m[1], +m[2]] : null; };
 const parseIdx = v => v.split(",").map(Number).filter(Number.isInteger);
-function arrayBlock(body) {
+function parseArray(body) {
   const lines = body.split("\n").filter(l => l.trim());
   let vals;
   try { vals = JSON.parse(lines[0]); } catch (e) { vals = lines[0].replace(/^\[|\]$/g, "").split(",").map(s => s.trim()); }
-  if (!Array.isArray(vals)) return `<pre class="blk"><code>${esc(body)}</code></pre>`;
-  const n = vals.length;
+  if (!Array.isArray(vals)) return null;
+  vals = vals.map(v => String(typeof v === "object" ? JSON.stringify(v) : v));
   const rows = (lines.length > 1 ? lines.slice(1) : [""]).map(l => {
     const r = { label: "", range: [], dim: [], good: [], bad: [], ptr: {} };
     const li = l.indexOf("label=");
@@ -357,25 +369,90 @@ function arrayBlock(body) {
     }
     return r;
   });
-  const inR = (rs, i) => rs.some(([a, b]) => i >= a && i <= b);
   /* largura fixa por coluna, igual em todas as linhas, para os índices e ponteiros alinharem */
-  const w = Math.max(34, 14 + 9 * Math.max(...vals.map(v => String(typeof v === "object" ? JSON.stringify(v) : v).length)));
-  const cols = `style="grid-template-columns:repeat(${n},${w}px)"`;
-  const idxRow = `<div class="arr-row idx" ${cols}>${vals.map((_, i) => `<span>${i}</span>`).join("")}</div>`;
-  return `<div class="arr">${rows.map(r => {
-    const cells = vals.map((v, i) => {
-      const c = ["cell"];
-      if (inR(r.range, i)) c.push("in");
-      if (inR(r.dim, i)) c.push("dim");
-      if (r.good.includes(i)) c.push("good");
-      if (r.bad.includes(i)) c.push("bad");
-      return `<span class="${c.join(" ")}">${esc(typeof v === "object" ? JSON.stringify(v) : v)}</span>`;
-    }).join("");
-    const hasPtr = Object.keys(r.ptr).length;
-    const ptrs = hasPtr ? `<div class="arr-row ptr" ${cols}>${vals.map((_, i) => `<span>${r.ptr[i] ? "▲<br>" + r.ptr[i].map(esc).join("<br>") : ""}</span>`).join("")}</div>` : "";
-    return `<div class="arr-step">${r.label ? `<div class="arr-label">${inline(r.label)}</div>` : ""}${idxRow}<div class="arr-row" ${cols}>${cells}</div>${ptrs}</div>`;
+  const w = Math.max(34, 14 + 9 * Math.max(...vals.map(v => v.length)));
+  return { vals, rows, w };
+}
+const inR = (rs, i) => rs.some(([a, b]) => i >= a && i <= b);
+const cellCls = (r, i) => ["cell", inR(r.range, i) && "in", inR(r.dim, i) && "dim", r.good.includes(i) && "good", r.bad.includes(i) && "bad"].filter(Boolean).join(" ");
+const arrCols = spec => `style="grid-template-columns:repeat(${spec.vals.length},${spec.w}px)"`;
+const idxRow = spec => `<div class="arr-row idx" ${arrCols(spec)}>${spec.vals.map((_, i) => `<span>${i}</span>`).join("")}</div>`;
+function staticArray(spec) {
+  const cols = arrCols(spec);
+  return `<div class="arr">${spec.rows.map(r => {
+    const cells = spec.vals.map((v, i) => `<span class="${cellCls(r, i)}">${esc(v)}</span>`).join("");
+    const ptrs = Object.keys(r.ptr).length ? `<div class="arr-row ptr" ${cols}>${spec.vals.map((_, i) => `<span>${r.ptr[i] ? "▲<br>" + r.ptr[i].map(esc).join("<br>") : ""}</span>`).join("")}</div>` : "";
+    return `<div class="arr-step">${r.label ? `<div class="arr-label">${inline(r.label)}</div>` : ""}${idxRow(spec)}<div class="arr-row" ${cols}>${cells}</div>${ptrs}</div>`;
   }).join("")}</div>`;
 }
+/* várias etapas: um player animado (◀ ▶ Play), que lembra a etapa mesmo quando o chat é redesenhado */
+const ARR = new Map();
+function arrayBlock(body) {
+  const spec = parseArray(body);
+  if (!spec) return `<pre class="blk"><code>${esc(body)}</code></pre>`;
+  if (spec.rows.length < 2) return staticArray(spec);
+  return `<div class="arr-player" data-key="${esc(body)}" data-spec="${esc(JSON.stringify(spec))}"></div>`;
+}
+const ARR_GAP = 3;
+function drawPlayer(el) {
+  const spec = JSON.parse(el.dataset.spec), key = el.dataset.key;
+  const st = ARR.get(key) || { step: 0, all: false };
+  ARR.set(key, st);
+  if (!el.firstChild) {
+    el.innerHTML = `<div class="arr-view"><div class="arr-label"></div><div class="arr-stage">${idxRow(spec)}<div class="arr-row cells" ${arrCols(spec)}>${spec.vals.map(v => `<span class="cell">${esc(v)}</span>`).join("")}</div><div class="arr-ptrs"></div></div></div>
+      <div class="arr-all" hidden></div>
+      <div class="arr-ctl"><button class="btn" type="button" data-arr="prev" aria-label="Etapa anterior">◀</button><button class="btn" type="button" data-arr="play">▶ Play</button><button class="btn" type="button" data-arr="next" aria-label="Próxima etapa">▶</button><span class="arr-count"></span><button class="btn ghost" type="button" data-arr="all">Ver todas</button></div>`;
+  }
+  const n = spec.rows.length;
+  st.step = Math.min(Math.max(st.step, 0), n - 1);
+  el.querySelector(".arr-view").hidden = st.all;
+  const all = el.querySelector(".arr-all");
+  all.hidden = !st.all;
+  if (st.all && !all.firstChild) all.innerHTML = staticArray(spec);
+  el.querySelector('[data-arr="all"]').textContent = st.all ? "Animar" : "Ver todas";
+  el.querySelectorAll('[data-arr="prev"],[data-arr="next"],[data-arr="play"]').forEach(b => b.disabled = st.all);
+  el.querySelector('[data-arr="play"]').textContent = st.timer ? "❚❚ Pausa" : "▶ Play";
+  el.querySelector(".arr-count").textContent = st.all ? `${n} etapas` : `${st.step + 1} / ${n}`;
+  const r = spec.rows[st.step];
+  el.querySelector(".arr-view > .arr-label").innerHTML = inline(r.label || "");
+  el.querySelectorAll(".arr-row.cells .cell").forEach((c, i) => c.className = cellCls(r, i));
+  /* ponteiros: um elemento por nome, que desliza até o novo índice */
+  const layer = el.querySelector(".arr-ptrs");
+  const seen = new Set();
+  let rowsUsed = 0;
+  for (const [i, names] of Object.entries(r.ptr)) names.forEach((name, k) => {
+    seen.add(name);
+    rowsUsed = Math.max(rowsUsed, k + 1);
+    let p = [...layer.children].find(x => x.dataset.name === name);
+    if (!p) { p = document.createElement("span"); p.className = "arr-ptr"; p.dataset.name = name; p.innerHTML = `▲<br>${esc(name)}`; layer.appendChild(p); }
+    p.style.left = `${+i * (spec.w + ARR_GAP) + spec.w / 2}px`;
+    p.style.top = `${k * 2.5}em`;
+    p.style.opacity = 1;
+  });
+  [...layer.children].forEach(p => { if (!seen.has(p.dataset.name)) p.style.opacity = 0; });
+  layer.style.height = `${rowsUsed * 2.5}em`;
+}
+function drawPlayers() { document.querySelectorAll(".arr-player").forEach(drawPlayer); }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-arr]");
+  if (!b) return;
+  const el = b.closest(".arr-player"), key = el.dataset.key, st = ARR.get(key);
+  const n = JSON.parse(el.dataset.spec).rows.length;
+  const stop = () => { clearInterval(st.timer); st.timer = null; };
+  const redraw = () => document.querySelectorAll(".arr-player").forEach(x => { if (x.dataset.key === key) drawPlayer(x); });
+  const act = b.dataset.arr;
+  if (act === "prev") { stop(); st.step--; }
+  else if (act === "next") { stop(); st.step++; }
+  else if (act === "all") { stop(); st.all = !st.all; }
+  else if (act === "play") {
+    if (st.timer) stop();
+    else {
+      if (st.step >= n - 1) st.step = 0;
+      st.timer = setInterval(() => { if (st.step >= n - 1) stop(); else st.step++; redraw(); }, 1600);
+    }
+  }
+  redraw();
+});
 function tableBlock(lines) {
   const cells = l => l.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
   const body = lines.filter(l => !/^\s*\|?[\s:|-]+\|?\s*$/.test(l));
@@ -457,7 +534,7 @@ function renderFeedback() {
 
 function renderAll(first) {
   S.feedback = S.feedback || []; S.path = S.path || []; S.thread = S.thread || []; S.ready = S.ready || [];
-  renderTop(); renderLeft(); renderChat(first); renderFeedback(); drawMermaid();
+  renderTop(); renderLeft(); renderChat(first); renderFeedback(); drawMermaid(); drawPlayers();
 }
 
 /* composer: estático, com rascunho guardado */
