@@ -68,6 +68,7 @@ Where to answer:
       - Solving a problem also unhides it among the pattern's classics.
       - Entries are written only after a problem is solved; see step 6.
       - The tree page embeds `solved` at build time, so after changing it run `python .coach/build_coach.py` (Lavish then reloads the tree once).
+    - `models`: `[{name, fix, smell, seen: [{n, slips}]}]`, the user's recurring mental-model errors across problems (see step 6). `name` is the wrong model in a few words, `fix` the corrected model, `smell` the early sign in code, and `seen` lists each problem where it showed up with the count of slips. The pages ignore it; it is your memory.
   - `.coach/thread.jsonl` is written only by the server and is append-only. Never edit or truncate it, even to remove a test message: `tail -F` in the inbox monitor re-announces the whole file after any rewrite. Don't post throwaway test messages to it either.
   - `.coach/dist/coach.html` is build output; the server injects state and thread into it when it serves the page.
 
@@ -107,11 +108,20 @@ Rules for the chat:
    - Comment on **every save that changes logic**. Judge *direction*, not perfection.
    - Put at most one or two guiding questions in the chat message and add a feedback entry in `state.json`. Mirror it briefly in the terminal.
    - Ignore saves that don't change logic, such as whitespace or `.md` re-saves.
+   - **Track the model behind each slip.** For every wrong save, note privately which mental model it comes from, not just the code error. Different code errors often share one model (e.g. `weight >= n`, `idx == n - 1` and a misplaced `+ 1` are all "mixing two index frames").
+   - When a slip repeats a model already seen (in this problem, or in `models` from earlier ones), say so in the chat: name the model, not only the line ("same frame mix as before: …"). Ask the question that targets the model, not just the patch.
+   - Two or more saves that only tweak a constant or an offset back and forth mean they are tuning, not reasoning: stop the code and ask for the rule in one sentence.
 5. **Done.** The only signal is that all tests of that problem are green. Check tests only when the file compiles:
    - Run `dotnet test TopCoding.Array --artifacts-path <scratchpad>/build --filter "FullyQualifiedName~PNNN_"`.
    - The separate artifacts path avoids file locks from Visual Studio.
    - All 47 problems share one project, so any half-written file breaks the build. In that case, judge from reading the code.
-6. **Justificar + Discriminar.** Once the tests are green, set `phase: justify` and cover:
+6. **Justificar + Discriminar.** Once the tests are green, set `phase: justify`. Open with the mental-model review, then cover the rest:
+   - **Mental-model review (always first, unless coding had no wrong saves):**
+     - Group every slip of the coding phase by the mental model behind it, not by line or symptom. Most repeated first, with the count and the concrete saves that showed it.
+     - For each group, give: the wrong model, the corrected model, the smell that should have warned them, and one habit that prevents it.
+     - Check `models` in `state.json`: if a group matches an earlier entry, say it is a repeat and from which problems. Repeats are the main point of the review.
+     - End with one question: which model feels least clear, so you can drill it before moving on.
+     - Update `models`: add new groups, and add `{n, slips}` to `seen` for repeats.
    - time and space complexity, and the invariant;
    - gotchas they missed, and optimizations;
    - then flip one condition (negatives, O(1) space, streaming, sorted input) and ask whether the solution still holds.
