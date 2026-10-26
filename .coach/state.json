@@ -1,8 +1,35 @@
 {
-  "phase": "recognize",
+  "phase": "justify",
   "problem": 4,
-  "path": [],
-  "question": "Ruler: n up to 10^4, which complexities fit, is O(n^2) safe?",
+  "path": [
+    {
+      "q": "Qual é a forma principal do input?",
+      "a": "Array ou string"
+    },
+    {
+      "q": "O que o enunciado pede sobre o array/string?",
+      "a": "Um ótimo (máx/mín): o mínimo de saltos, e cada escolha afeta as próximas"
+    },
+    {
+      "q": "Programação dinâmica: qual é o formato do estado?",
+      "a": "Na verdade a melhor escolha local nunca precisa ser desfeita: pousar no j que maximiza j + nums[j]",
+      "leaf": "greedy"
+    },
+    {
+      "q": "Que trabalho a solução precisa fazer, que a força bruta repete ou faz às cegas?",
+      "a": "Descartar candidatos sem testá-los (tentar todas as rotas é exponencial)"
+    },
+    {
+      "q": "O que garante que o descarte é seguro?",
+      "a": "A melhor escolha local nunca precisa ser desfeita"
+    },
+    {
+      "q": "Qual é a escolha local?",
+      "a": "Outra regra local: pousar no j que maximiza j + nums[j]",
+      "leaf": "greedy"
+    }
+  ],
+  "question": "What is the time complexity, and what invariant makes the greedy choice safe?",
   "feedback": [
     {
       "verdict": "Good start, still a skeleton",
@@ -87,6 +114,202 @@
       "file": "Solution.cs",
       "time": "19:34",
       "text": "All P003 tests pass. `row / 3, col / 3` was the last piece.\n\nNow justify: the invariant, and complexity for an n × n board."
+    },
+    {
+      "verdict": "Loop frame is right",
+      "kind": "info",
+      "file": "P004 Solution.cs",
+      "time": "13:34",
+      "text": "`while (currIdx < nums.Length - 1)` handles `[5]` for free, and `currIdx + nums[currIdx]` bounds the candidates.\n\nIf that bound already reaches the end, do you need to scan? Where does the jump count live?"
+    },
+    {
+      "verdict": "Check the for condition",
+      "kind": "warn",
+      "file": "P004 Solution.cs",
+      "time": "13:35",
+      "text": "A `for` condition means \"keep going while true\". Trace `optIdx == maxTarget` on `[2, 3, 1, 1, 4]` from `currIdx = 0`: how many times does the body run?\n\nAlso check later: can `maxTarget` be past the last index?"
+    },
+    {
+      "verdict": "Range end and slice index",
+      "kind": "warn",
+      "file": "P004 Solution.cs",
+      "time": "13:38",
+      "text": "`a..b` excludes `b`: does `nums[1..2]` include landing 2?\n\n`Select`'s `idx` counts from the slice start. What do you add to it to get the original `j` for the score `j + nums[j]`?"
+    },
+    {
+      "verdict": "Anonymous type syntax, and the score",
+      "kind": "warn",
+      "file": "P004 Solution.cs",
+      "time": "07:42",
+      "text": "Anonymous types use `=` and `,`: `new { weight = ..., idx }`.\n\n`idx` counts from the slice start (`currIdx + 1`). Is `v + idx` the score `j + nums[j]` you planned?"
+    },
+    {
+      "verdict": "Full shape, trace one pass",
+      "kind": "warn",
+      "file": "P004 Solution.cs",
+      "time": "07:47",
+      "text": "`jumps`, the `currIdx` update and `return jumps` complete the plan.\n\nTrace `[2, 3, 1, 1, 4]` from `currIdx = 0`: what is in `nums[1..2]`, and where does `currIdx = bestOptIdx` send you?"
+    },
+    {
+      "verdict": "Range fixed, idx still slice-relative",
+      "kind": "warn",
+      "file": "P004 Solution.cs",
+      "time": "07:51",
+      "text": "`(maxTarget + 1)` includes the last landing now.\n\n`idx` counts from `currIdx + 1`, so `currIdx = bestOptIdx` sends you back to the start. What turns `idx` into the real `j`, both for `currIdx` and for `weight`?"
+    },
+    {
+      "verdict": "Real index fixed, check the slice end",
+      "kind": "good",
+      "file": "P004 Solution.cs",
+      "time": "08:22",
+      "text": "`currIdx + bestOptIdx + 1` maps back to the real `j`. `weight` can stay slice-relative: the same offset for every candidate never changes the winner.\n\nOn `[2, 1]`, is `maxTarget + 1` within `nums.Length`?"
+    },
+    {
+      "verdict": "`<=` runs one turn too many",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:00",
+      "text": "With `<=` the loop also runs while `currIdx` is the last index.\n\nTrace `[0]`: the expected answer is 0 jumps. Does the body run, and what do the slice and `MaxBy` get?"
+    },
+    {
+      "verdict": "Bounds fixed, one greedy case left",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:03",
+      "text": "`<` plus `Math.Min` handles both `[0]` and `[2, 1]`: the loop stops at the end and the slice never overruns.\n\nTrace `[2, 5, 0]`: from index 0, which landing has the best `j + nums[j]`, and how many jumps do you end up with? Is that the minimum?"
+    },
+    {
+      "verdict": "The `continue` skips counting jumps",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:07",
+      "text": "Line 23 runs **after** you've already moved `currIdx`, and `continue` skips `jumps++`.\n\nTrace `[2, 3, 1, 1, 4]` (answer 2): after each move, does line 23 fire, and what do you return?"
+    },
+    {
+      "verdict": "Check moved up, now it never lets go",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:07",
+      "text": "With `Math.Min` on line 12, can `currIdx + bestOptIdx` ever exceed `nums.Length - 1`? If line 20 is always true, what happens to `currIdx` on the next turn of the loop?"
+    },
+    {
+      "verdict": "Back to the clean loop",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "11:09",
+      "text": "Counting at the top of the loop is equivalent to counting at the bottom, and the loop always ends now.\n\nStill open: `[2, 5, 0]`. When the last index is within reach, which landing should win?"
+    },
+    {
+      "verdict": "Early exit: right idea, wrong test",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:13",
+      "text": "Stopping as soon as the end is reachable is the right idea.\n\nBut `weight` is slice-relative, and \"this candidate *reaches* the end\" is not \"I can *land on* the end now\". Trace `[1, 3, 0, 0]` (answer 2): what does line 22 see, and what do you return?"
+    },
+    {
+      "verdict": "Threshold shifted, test still off",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:14",
+      "text": "`>= nums.Length` passes `[1, 3, 0, 0]`, but the test still asks about a candidate's reach. Trace `[1, 4, 0, 0]` (answer 2)."
+    },
+    {
+      "verdict": "Tuning numbers, not the idea",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:15",
+      "text": "`jumps + 1` fixes `[1, 4, 0, 0]` but breaks `[2, 5, 0]` (answer 1). Say the stop rule in words before coding it."
+    },
+    {
+      "verdict": "Counter moved, same test",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "11:18",
+      "text": "With `jumps++` at the bottom, line 22's `jumps + 1` now fits `[2, 5, 0]`, but `[1, 4, 0, 0]` breaks again. The four questions in the chat still lead to the fix."
+    },
+    {
+      "verdict": "Offset added, still a candidate's reach",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:20",
+      "text": "`+ currIdx` moves toward the real `j`, but the test still asks how far a *candidate* reaches. `[1, 4, 0, 0]` still returns 1."
+    },
+    {
+      "verdict": "Clean slate",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "11:21",
+      "text": "The early-exit line is gone, so this is the plain greedy loop again. The open case is still `[2, 5, 0]`."
+    },
+    {
+      "verdict": "Won't compile; reorder loses `idx`",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:24",
+      "text": "`OrderByDescending` has no `(element, index)` overload. And a `Select` **after** reordering numbers the reordered sequence, so `idx` is no longer the slice position."
+    },
+    {
+      "verdict": "Compiles; `idx` kept; only breaks ties",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "11:25",
+      "text": "Sorting after `Select` keeps `idx` right, and `MaxBy` returns the first maximum, so ties now go to the farther landing.\n\nOn `[2, 5, 0]` the weights are `5` and `1`: is that a tie?"
+    },
+    {
+      "verdict": "Right idea: the end always wins",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "11:28",
+      "text": "Giving the last index `int.MaxValue` is exactly the missing rule.\n\nOne slip: `o.idx` counts from the slice. On `[2, 5, 0]`, what is `o.idx` for the landing at index 2?"
+    },
+    {
+      "verdict": "Slice index in two places now",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:29",
+      "text": "Line 25 compares `bestOptIdx`, a distance from `currIdx`, with `nums.Length`. And when it fires, has the final jump been counted?\n\nTip: compute the real index `j` once and use it in both tests."
+    },
+    {
+      "verdict": "Still comparing a slice index",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "21:43",
+      "text": "`- 1` changes the threshold, not the kind of index. Lines 19 and 21 both compare a slice/distance value with a position in `nums`. Trace `[2, 5, 0]` (answer 1) line by line."
+    },
+    {
+      "verdict": "Offset added, one short",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "21:43",
+      "text": "`o.idx + currIdx` is the right move. On `[2, 5, 0]`, the end has `idx = 1` with `currIdx = 0`: does that sum give 2? Where does the slice start?"
+    },
+    {
+      "verdict": "Early return gone, good",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "21:46",
+      "text": "The `while` already stops at the end, so line 21 wasn't needed. Only line 19's offset is left: the slice starts at `currIdx + 1`."
+    },
+    {
+      "verdict": "The +1 landed on the wrong line",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "21:50",
+      "text": "Line 23 was already right: `bestOptIdx` includes its `+ 1`. Now each jump overshoots by one. The missing `+ 1` belongs in line 19's comparison."
+    },
+    {
+      "verdict": "All P004 tests green",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "21:51",
+      "text": "The real index `o.idx + currIdx + 1` in line 19 completes the rule: the end wins outright, otherwise the farthest `j + nums[j]`."
+    },
+    {
+      "verdict": "Sort removed, still green",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "22:05",
+      "text": "Without `OrderByDescending`, ties go to the nearer landing, and that's fine: equal reach means equivalent landings. Time is O(n) now, with no log factor."
     }
   ],
   "solved": [
@@ -163,6 +386,52 @@
         {
           "name": "programação dinâmica",
           "why": "Não há ótimo nem contagem, e o mesmo tabuleiro parcial praticamente nunca volta."
+        }
+      ]
+    }
+  ],
+  "models": [
+    {
+      "name": "Mixing two index frames",
+      "fix": "Each index lives in one frame; convert once at the boundary (slice idx -> real j) and never use the raw one again",
+      "smell": "Unsure where a +1/-1 goes",
+      "seen": [
+        {
+          "n": 4,
+          "slips": 6
+        }
+      ]
+    },
+    {
+      "name": "Tuning the constant instead of the question",
+      "fix": "If a tweak flips which inputs pass, the condition is wrong: state the rule in one sentence, then code it",
+      "smell": "Saves that only move a threshold or a +1 back and forth",
+      "seen": [
+        {
+          "n": 4,
+          "slips": 4
+        }
+      ]
+    },
+    {
+      "name": "'Can reach' vs 'lands on' (this step vs the next)",
+      "fix": "For each condition, ask which step it is about: this one or the next",
+      "smell": "A score of future potential used as a stop test",
+      "seen": [
+        {
+          "n": 4,
+          "slips": 2
+        }
+      ]
+    },
+    {
+      "name": "Loop invariant not stated",
+      "fix": "Write what each loop variable means at the top of the loop; every line must keep it true",
+      "smell": "Changing < to <=, or returning before the counter update",
+      "seen": [
+        {
+          "n": 4,
+          "slips": 2
         }
       ]
     }
