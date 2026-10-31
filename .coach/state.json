@@ -1,8 +1,30 @@
 {
-  "phase": "pick",
-  "problem": null,
-  "path": [],
-  "question": null,
+  "phase": "justify",
+  "problem": 6,
+  "path": [
+    {
+      "q": "Qual é a forma principal do input?",
+      "a": "Array ou string"
+    },
+    {
+      "q": "O que o enunciado pede sobre o array/string?",
+      "a": "(nenhuma opção encaixou)"
+    },
+    {
+      "q": "Que trabalho a solução precisa fazer, que a força bruta repete ou faz às cegas?",
+      "a": "Descartar candidatos sem testá-los, com a garantia de não perder a resposta"
+    },
+    {
+      "q": "O que garante que o descarte é seguro?",
+      "a": "A melhor escolha local nunca precisa ser desfeita"
+    },
+    {
+      "q": "Qual é a escolha local?",
+      "a": "Outra regra local, provada por um argumento de troca",
+      "leaf": "greedy"
+    }
+  ],
+  "question": "Extend the tree: add a reachability option at the array node?",
   "feedback": [
     {
       "verdict": "Good start, still a skeleton",
@@ -332,6 +354,41 @@
       "file": "Solution.cs",
       "time": "15:25",
       "text": "Reset to `0` when the sum behind is negative, then always add `nums[i]`: restart means the block becomes `[x]`, glue means `T + x`. `MaxTotal` keeps the record."
+    },
+    {
+      "verdict": "This is the P004 plan, not the P006 one",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "17:13",
+      "text": "Slices, `Select` and `MaxBy` pick a landing and jump, as in P004.\n\nThe agreed P006 plan visits every index and keeps only `fronteira`. Which plan do you want to code?"
+    },
+    {
+      "verdict": "Max is right, check where the jump starts",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "17:18",
+      "text": "`Math.Max` keeps the frontier growing.\n\nThe jump from index `i` starts at `i`, not at `fronteira`. On `[2, 1, 0, 0]` (answer `false`), what does line 14 give at index 1?"
+    },
+    {
+      "verdict": "Tuning a constant: same model as P004",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "17:21",
+      "text": "`- 1` shifts a number; the issue is where the jump starts. Say in words: standing on `i` with value `nums[i]`, which index does the jump reach?"
+    },
+    {
+      "verdict": "Reach fixed; check the order of 14 and 16",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "17:22",
+      "text": "`i + nums[i]` is the reach from `i`.\n\nOn `[0, 1]` (answer `false`), line 14 uses `nums[1]` before line 16 asks if you can stand on 1. Which test must come first?"
+    },
+    {
+      "verdict": "All P006 tests green",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "17:26",
+      "text": "Test `i > fronteira` first, then grow the frontier with `i + nums[i]`. One pass, one `int`."
     }
   ],
   "solved": [
@@ -458,6 +515,26 @@
           "why": "Kadane é DP: dp[i] = nums[i] + max(dp[i−1], 0), guardado numa variável. Ainda compara duas opções a cada passo (colar ou recomeçar), por isso continua DP e não guloso."
         }
       ]
+    },
+    {
+      "n": 6,
+      "title": "Jump Game",
+      "leaf": "greedy",
+      "works": "Pode-se saltar qualquer distância de 1 a nums[i], então o que se alcança é sempre um bloco sem buracos, de 0 até a fronteira. Em cada índice: se i > fronteira, a ponte não chega e a resposta é false; senão, a fronteira passa a ser max(fronteira, i + nums[i]). Testar antes de usar nums[i]. Uma passada: O(n) de tempo, O(1) de espaço.",
+      "nb": [
+        {
+          "name": "programação dinâmica (alcança[i])",
+          "why": "Também acerta: alcança[i] = existe k < i alcançável com k + nums[k] >= i. Mas refaz o laço de dentro para cada i, O(n²). Como a tabela é true…true, false…, só importa onde termina o trecho true: a fronteira. É a troca quando a regra de salto abre buracos (ex.: exatamente nums[i]: muda >= para ==), como em [2, 3, 0, 0]."
+        },
+        {
+          "name": "plano do P004 (escolher o melhor pouso)",
+          "why": "Também acerta, mas é complexidade desnecessária: a fatia lê os mesmos índices (alguns duas vezes) e aloca memória a cada salto. Escolher o pouso só importa quando a pergunta é quantos saltos."
+        },
+        {
+          "name": "força bruta (tentar todos os saltos)",
+          "why": "Exponencial: explora o mesmo índice várias vezes, e o que se alcança a partir dele não depende de como se chegou."
+        }
+      ]
     }
   ],
   "models": [
@@ -469,6 +546,10 @@
         {
           "n": 4,
           "slips": 6
+        },
+        {
+          "n": 6,
+          "slips": 2
         }
       ]
     },
@@ -480,6 +561,10 @@
         {
           "n": 4,
           "slips": 4
+        },
+        {
+          "n": 6,
+          "slips": 1
         }
       ]
     },
@@ -490,6 +575,10 @@
       "seen": [
         {
           "n": 4,
+          "slips": 2
+        },
+        {
+          "n": 6,
           "slips": 2
         }
       ]
@@ -513,6 +602,10 @@
         {
           "n": 5,
           "slips": 4
+        },
+        {
+          "n": 6,
+          "slips": 1
         }
       ]
     },
@@ -524,6 +617,17 @@
         {
           "n": 5,
           "slips": 2
+        }
+      ]
+    },
+    {
+      "name": "Reusing the previous problem's code shape",
+      "fix": "Code the plan agreed for this problem; a similar statement does not mean the same algorithm",
+      "smell": "Pasting the last solution's structure (slices, MaxBy) before re-reading the strategy",
+      "seen": [
+        {
+          "n": 6,
+          "slips": 1
         }
       ]
     }
