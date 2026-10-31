@@ -78,6 +78,7 @@ python .coach/server.py           # página do coach (chat)
 python .coach/build_coach.py      # rebuild das páginas (coach + árvore)
 node .coach/check_tree.mjs        # checagem estrutural da árvore
 python .coach/verify_bounds.py    # verifica os contraexemplos da árvore
+python .coach/lessons/build_lessons.py   # aulas animadas (gera .coach/dist/lessons.html)
 dotnet test TopCoding.Array --filter "FullyQualifiedName~P003_"   # testes de um problema
 ```
 
@@ -85,4 +86,5 @@ dotnet test TopCoding.Array --filter "FullyQualifiedName~P003_"   # testes de um
 
 - `TopCoding.Array/Problems/PNNN_Nome/`: `Solution.cs` (seu código), testes e enunciado (`.md`).
 - `.coach/`: servidor, template, fonte da árvore, scripts de build e de verificação, `state.json` e `thread.jsonl` (histórico do chat).
+- `.coach/lessons/`: aulas animadas e narradas sobre a árvore (player + uma aula por padrão). Publicadas em https://claude.ai/artifact/H1etDc2Mr3MLp6RZkHGk36.
 - `.claude/skills/dsa-coach/SKILL.md`: as regras da sessão de coaching.
