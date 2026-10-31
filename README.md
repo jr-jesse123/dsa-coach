@@ -78,6 +78,7 @@ python .coach/server.py           # página do coach (chat)
 python .coach/build_coach.py      # rebuild das páginas (coach + árvore)
 node .coach/check_tree.mjs        # checagem estrutural da árvore
 python .coach/verify_bounds.py    # verifica os contraexemplos da árvore
+python .coach/lessons/build_audio.py     # grava a narração das aulas (pip install edge-tts; precisa de internet)
 python .coach/lessons/build_lessons.py   # aulas animadas (gera .coach/dist/lessons.html)
 dotnet test TopCoding.Array --filter "FullyQualifiedName~P003_"   # testes de um problema
 ```

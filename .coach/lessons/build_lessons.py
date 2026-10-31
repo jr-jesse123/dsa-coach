@@ -11,6 +11,7 @@ Run: python .coach/lessons/build_lessons.py
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import unicodedata
@@ -23,6 +24,8 @@ CTPL = os.path.join(COACH, "coach.template.html")
 PLAYER = os.path.join(HERE, "player.template.html")
 OUT = os.path.join(COACH, "dist", "lessons.html")
 ORDER = ["window", "prefix"]          # lesson modules, in menu order
+AUDIO = os.path.join(HERE, "audio")    # recorded narration (build_audio.py)
+OUT_AUDIO = os.path.join(COACH, "dist", "audio")
 
 sys.path.insert(0, HERE)
 errors = []
@@ -120,6 +123,27 @@ def check_refs(lesson, T):
     return used_nodes, {p for p in used_pats if p}
 
 
+def recorded(lessons):
+    """Recorded narration from audio/manifest.json, copied next to the page as dist/audio/.
+    Texts without a file fall back to the device voice; the build says how many."""
+    man = os.path.join(AUDIO, "manifest.json")
+    shutil.rmtree(OUT_AUDIO, ignore_errors=True)
+    if not os.path.exists(man):
+        print("--  no recorded narration (run build_audio.py): the page uses the device voice")
+        return None
+    m = json.load(open(man, encoding="utf-8"))
+    spoken = {t for L in lessons for sc in L["scenes"] for st in sc["steps"]
+              for t in (st.get("say"), st.get("quiz", {}).get("explain")) if t}
+    files = {t: f for t, f in m["files"].items() if t in spoken and os.path.exists(os.path.join(AUDIO, f))}
+    os.makedirs(OUT_AUDIO)
+    for f in set(files.values()):
+        shutil.copy2(os.path.join(AUDIO, f), OUT_AUDIO)
+    missing = len(spoken) - len(files)
+    print(f"{'ok ' if not missing else '!! '} recorded narration ({m['voice']}): {len(files)}/{len(spoken)} texts"
+          + (f", {missing} not recorded: run build_audio.py" if missing else ""))
+    return {"voice": m["voice"], "base": "audio/", "files": files}
+
+
 def main():
     T = tree_data()
     nums, titles = the47()
@@ -143,7 +167,8 @@ def main():
         "P": {k: {f: T["P"][k].get(f) for f in keep} for k in sorted(pats)},
         "F": {L["leaf"]: T["F"].get(L["leaf"], []) for L in lessons},
     }
-    payload = json.dumps({"tree": data, "lessons": lessons}, ensure_ascii=False).replace("</", "<\\/")
+    audio = recorded(lessons)
+    payload = json.dumps({"tree": data, "lessons": lessons, "audio": audio}, ensure_ascii=False).replace("</", "<\\/")
     html = open(PLAYER, encoding="utf-8").read()
     if "/*__DATA__*/null" not in html:
         sys.exit("player template has no /*__DATA__*/null slot")

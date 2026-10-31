@@ -106,12 +106,13 @@ Rules for the chat:
 
 ### Pattern lessons (animated player)
 
-`.coach/lessons/` holds short narrated lessons, one per pattern, that walk a problem's structure, both readings of the tree (with each node's `D` criterion), the pattern's Fronteiras and its C# template, with "pause and predict" stops. Published at https://claude.ai/artifact/H1etDc2Mr3MLp6RZkHGk36 (narration uses the device's pt-BR voice).
+`.coach/lessons/` holds short narrated lessons, one per pattern, that walk a problem's structure, both readings of the tree (with each node's `D` criterion), the pattern's Fronteiras and its C# template, with "pause and predict" stops. Published at https://claude.ai/artifact/H1etDc2Mr3MLp6RZkHGk36.
 
 - `player.template.html` is the player; each lesson is a Python module (`window.py`, `prefix.py`) whose traces come from simulating the code, with asserts against brute force. Add a lesson by writing a module and listing it in `ORDER` in `build_lessons.py`.
 - Questions, options, criteria, card fields and Fronteiras are read from `tree-source.html` at build time, so a tree edit flows into the lessons. Classics lists (`cl`) are never embedded.
 - `python .coach/lessons/build_lessons.py` fails if a lesson cites a missing node or pattern, or names one of the 47 problems (LeetCode number or title). Never use one of the 47 as a lesson example.
-- After a rebuild, republish `.coach/dist/lessons.html` to the artifact URL above.
+- **Narration** is recorded audio, because the Claude app on Android has no device voice. `python .coach/lessons/build_audio.py` records each `say` and quiz `explain` with Edge's neural voice (`pip install edge-tts`, needs internet; the cloud container's network blocks it, so run it on the PC) into `.coach/lessons/audio/` (one mp3 per text, named by a hash, plus `manifest.json`; commit them). Only changed lines are re-recorded. Texts without a recording fall back to the device voice, then to reading time. `--engine test` writes tones for testing the player: never commit or publish those.
+- After a rebuild, republish `.coach/dist/lessons.html` to the artifact URL above, with every `.coach/dist/audio/*.mp3` in `files` as `audio/<name>.mp3` (at most 255 files per publish; split larger sets over several publishes to the same URL).
 
 ## 3. The coaching loop (agreed with the user)
 

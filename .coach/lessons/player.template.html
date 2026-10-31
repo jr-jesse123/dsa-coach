@@ -330,21 +330,48 @@ function pickVoice() {
     || vs.find(v => /^pt[-_]BR/i.test(v.lang)) || vs.find(v => /^pt/i.test(v.lang)) || null;
   voiceNote();
 }
-const canSpeak = () => speech.ok && speech.voice && prefs.voice;
+/* narração gravada (audio/manifest.json, gerado por build_audio.py): funciona em qualquer app */
+const REC = DATA.audio && Object.keys(DATA.audio.files || {}).length ? DATA.audio : null;
+const clip = text => REC && REC.files[text];
+const player = new Audio();
+player.preload = "auto";
+try { player.preservesPitch = true; } catch {}
+const hasVoice = () => !!(REC || (speech.ok && speech.voice));
+const canSpeak = () => prefs.voice && hasVoice();
+let blocked = false;
 function voiceNote() {
   const n = $("#voicenote");
-  if (!speech.ok || !speech.voice) n.textContent = "Este navegador não tem voz em português: a aula avança pelo tempo de leitura, com a legenda ligada.";
+  if (blocked) n.textContent = "O som foi bloqueado pelo aparelho. Toque em Tocar para liberar.";
+  else if (REC && prefs.voice) n.textContent = `Narração gravada (${REC.voice}). Espaço toca e pausa; as setas andam um passo.`;
+  else if (REC) n.textContent = "Narração desligada: a aula avança pelo tempo de leitura.";
+  else if (!speech.ok || !speech.voice) n.textContent = "Este navegador não tem voz em português: a aula avança pelo tempo de leitura, com a legenda ligada.";
   else if (!prefs.voice) n.textContent = "Narração desligada: a aula avança pelo tempo de leitura.";
   else n.textContent = `Narração com a voz do seu aparelho: ${speech.voice.name}. Espaço toca e pausa; as setas andam um passo.`;
   syncCC();
 }
 const readMs = text => (text.split(/\s+/).length / (165 * prefs.speed)) * 60000 + 900;
-function stopVoice() { token++; if (speech.ok) speechSynthesis.cancel(); }
+function stopVoice() { token++; if (speech.ok) speechSynthesis.cancel(); player.pause(); }
+function playClip(file, text, my, done) {
+  let fired = false;
+  const finish = () => { if (fired || my !== token) return; fired = true; setTimeout(() => my === token && done(), 250); };
+  player.onended = finish;
+  player.onerror = () => { if (my !== token || fired) return; fired = true; setTimeout(() => my === token && done(), readMs(text)); };
+  player.src = REC.base + file;
+  player.playbackRate = prefs.speed;
+  const pr = player.play();
+  if (pr) pr.then(() => { if (blocked) { blocked = false; voiceNote(); } }).catch(err => {
+    if (my !== token) return;
+    if (err && err.name === "NotAllowedError") { blocked = true; voiceNote(); setPlaying(false); }
+    else player.onerror();
+  });
+}
 function say(text, done) {
   const my = ++token;
   if (speech.ok) speechSynthesis.cancel();
+  player.pause();
   if (!text) { setTimeout(() => my === token && done(), 300); return; }
-  if (!canSpeak()) { setTimeout(() => my === token && done(), readMs(text)); return; }
+  if (prefs.voice && clip(text)) { playClip(clip(text), text, my, done); return; }
+  if (!(prefs.voice && speech.ok && speech.voice)) { setTimeout(() => my === token && done(), readMs(text)); return; }
   const parts = text.match(/[^.!?:]+[.!?:]*\s*/g) || [text];
   let i = 0;
   const next = () => {
@@ -712,8 +739,8 @@ function syncCC() {
   const on = prefs.cc == null ? !canSpeak() : prefs.cc;
   $("#caption").hidden = !on;
   $("#cc").setAttribute("aria-pressed", on);
-  $("#voice").setAttribute("aria-pressed", !!(prefs.voice && speech.voice));
-  $("#voice").disabled = !speech.voice;
+  $("#voice").setAttribute("aria-pressed", !!(prefs.voice && hasVoice()));
+  $("#voice").disabled = !hasVoice();
 }
 
 /* ---------------- controles ---------------- */
@@ -726,7 +753,7 @@ $("#play").onclick = () => {
 $("#prev").onclick = () => stepBy(-1);
 $("#next").onclick = () => stepBy(1);
 $("#speed").value = String(prefs.speed);
-$("#speed").onchange = e => { prefs.speed = +e.target.value; store.set("prefs", prefs); if (playing) runStep(); };
+$("#speed").onchange = e => { prefs.speed = +e.target.value; store.set("prefs", prefs); player.playbackRate = prefs.speed; if (playing && !REC) runStep(); };
 $("#voice").onclick = () => { prefs.voice = !prefs.voice; store.set("prefs", prefs); voiceNote(); if (playing) runStep(); };
 $("#cc").onclick = () => { const on = $("#cc").getAttribute("aria-pressed") !== "true"; prefs.cc = on; store.set("prefs", prefs); syncCC(); };
 document.addEventListener("keydown", e => {
