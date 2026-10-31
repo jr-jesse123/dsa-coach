@@ -283,6 +283,11 @@ const N = {
     { t: "Parênteses, expressões, aninhamento", go: "p:stack" },
     { t: "Valores em [1..n]; achar ausente/duplicado com O(1) de espaço", go: "p:cyclic" },
     { t: "Muitas palavras: prefixos, autocomplete, buscar palavras", go: "p:trie" },
+    { t: "Se dá para alcançar uma posição, ou com quantos passos", s: "cada posição diz para onde você pode ir a seguir", go: "reach" },
+  ]},
+  reach: { q: "Como cada passo leva você adiante?", opts: [
+    { t: "Qualquer distância até um limite: o que se alcança é um bloco sem buracos", s: "basta guardar a borda mais distante", go: "p:greedy" },
+    { t: "Só distâncias fixas, ou o alcance tem buracos", s: "uma tabela por posição: alcançável ou não, ou o menor número de passos", go: "p:dp1" },
   ]},
   contig: { q: "Qual é a condição sobre o trecho contíguo?", opts: [
     { t: "Uma restrição que quebra ao crescer e volta ao encolher", s: "≤ k distintos, sem repetir, soma ≥ alvo com todos positivos", go: "p:window" },
@@ -982,6 +987,7 @@ return x;
 const D = {
   root: "A forma do input define a família de estruturas. Quando há mais de uma leitura (um grid também é um grafo), escolha pela pergunta que o enunciado faz.",
   arr: "Separe primeiro o tipo de saída: todas as soluções (backtracking), um ótimo ou uma contagem em que as escolhas interagem (programação dinâmica), ou uma consulta sobre trechos, pares ou elementos.",
+  reach: "O que se alcança forma um bloco contíguo? Se cada passo cobre qualquer distância até um limite, sim, e uma borda resume tudo (guloso). Se há distâncias fixas ou buracos, cada posição precisa da sua própria resposta (programação dinâmica).",
   contig: "A validade do trecho é monotônica (crescer só piora)? Janela. Igualdade exata ou números negativos? Prefix sum. Só o maior valor, sem restrição? Kadane. Um extremo por janela de tamanho fixo? Deque.",
   pair: "Com um alvo exato, o par certo é um valor que você pode procurar. Sem alvo, procurando o melhor par por uma fórmula, não há o que procurar: é preciso uma ordem que descarte muitos pares a cada comparação, e quando a fórmula usa as posições, as próprias posições são essa ordem.",
   pairtgt: "A posição original importa? Se só os valores contam, ordenar libera dois ponteiros. Se os índices contam, um hash guarda o que já passou.",

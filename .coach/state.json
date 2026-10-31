@@ -1,30 +1,8 @@
 {
-  "phase": "justify",
-  "problem": 6,
-  "path": [
-    {
-      "q": "Qual é a forma principal do input?",
-      "a": "Array ou string"
-    },
-    {
-      "q": "O que o enunciado pede sobre o array/string?",
-      "a": "(nenhuma opção encaixou)"
-    },
-    {
-      "q": "Que trabalho a solução precisa fazer, que a força bruta repete ou faz às cegas?",
-      "a": "Descartar candidatos sem testá-los, com a garantia de não perder a resposta"
-    },
-    {
-      "q": "O que garante que o descarte é seguro?",
-      "a": "A melhor escolha local nunca precisa ser desfeita"
-    },
-    {
-      "q": "Qual é a escolha local?",
-      "a": "Outra regra local, provada por um argumento de troca",
-      "leaf": "greedy"
-    }
-  ],
-  "question": "Extend the tree: add a reachability option at the array node?",
+  "phase": "pick",
+  "problem": null,
+  "path": [],
+  "question": null,
   "feedback": [
     {
       "verdict": "Good start, still a skeleton",
