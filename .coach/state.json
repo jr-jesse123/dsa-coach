@@ -283,6 +283,55 @@
       "file": "Solution.cs",
       "time": "22:05",
       "text": "Without `OrderByDescending`, ties go to the nearer landing, and that's fine: equal reach means equivalent landings. Time is O(n) now, with no log factor."
+    },
+    {
+      "verdict": "Good init, check the two ends",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "10:49",
+      "text": "`max = int.MinValue` handles the all-negative case.\n\n`(0, nums.Length - 1)` puts pointers at both ends. The answer is only a sum: do you need the block's bounds?"
+    },
+    {
+      "verdict": "Loop shape right, check line 22",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "11:56",
+      "text": "`currTotal` as the sum behind you and a left-to-right `for` are the plan.\n\nLine 22 compares the number with the sum behind. On `[10, 15]` it says restart (15), but gluing gives 25. When does restarting win?"
+    },
+    {
+      "verdict": "Glue first, then test: line 28 changed meaning",
+      "kind": "info",
+      "file": "Solution.cs",
+      "time": "15:14",
+      "text": "Line 22 always glues and line 24 records the best. Since `currTotal` now includes `currNumber`, line 28 asks something new.\n\nOn `[10, 15]` it says glue, and on `[3, -5, 4]` it says restart. Say what it tests about the sum behind."
+    },
+    {
+      "verdict": "Real if/else; line 22 compares the wrong pair",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "15:16",
+      "text": "Restart/glue as an `if`/`else` is the right structure.\n\n`currTotal < currNumber` compares the sum behind with the number again. On `[10, 15]` it restarts, but gluing gives 25. Does a sum of 10 behind you help or hurt?"
+    },
+    {
+      "verdict": "Negatives are skipped, not glued",
+      "kind": "warn",
+      "file": "Solution.cs",
+      "time": "15:20",
+      "text": "Branching on `currNumber < 0` decides by the number again. On `[4, -1, 2]` the `-1` is never added, so the sum jumps over it: the block is no longer contiguous.\n\nThe decision depends only on the sum behind you. Say the rule in one sentence before the next save."
+    },
+    {
+      "verdict": "Right test: only the sum behind",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "15:24",
+      "text": "`currTotal < 0` tests only the sum behind, and line 21 always adds the current number.\n\nThe `if` body is still empty. It runs before line 21: what must `currTotal` hold so that the block becomes just `[x]`?"
+    },
+    {
+      "verdict": "All P005 tests green",
+      "kind": "good",
+      "file": "Solution.cs",
+      "time": "15:25",
+      "text": "Reset to `0` when the sum behind is negative, then always add `nums[i]`: restart means the block becomes `[x]`, glue means `T + x`. `MaxTotal` keeps the record."
     }
   ],
   "solved": [
@@ -381,6 +430,34 @@
           "why": "Desnecessário: empates de alcance são equivalentes, e ordenar cada janela custa O(n log n)."
         }
       ]
+    },
+    {
+      "n": 5,
+      "title": "Maximum Subarray",
+      "leaf": "kadane",
+      "works": "Para cada posição i, a melhor soma de um trecho que termina em i é nums[i] mais a soma de trás, se ela for ≥ 0 (senão, recomeça só com nums[i]). O número da vez sempre entra: a decisão depende só do passado que você carrega. O trecho vencedor termina em alguma posição, então um recorde guarda o maior desses valores. O(n) de tempo, O(1) de espaço.",
+      "nb": [
+        {
+          "name": "acumulado + menor prefixo",
+          "why": "Também funciona, com o mesmo O(n) e O(1): soma do trecho = acum − menor acumulado anterior. É o mesmo argumento visto pelos prefixos, e Kadane recomeça exatamente onde o acumulado bate um novo mínimo. Armadilha: subtrair antes de atualizar o mínimo. É a troca quando pedem soma exatamente k ou contagem (aí entra o dicionário)."
+        },
+        {
+          "name": "janela deslizante",
+          "why": "Com negativos a soma sobe e desce enquanto o trecho cresce, então não há regra segura para encolher pela esquerda. Funciona só quando crescer só piora (ex.: todos positivos e um limite)."
+        },
+        {
+          "name": "força bruta (todos os começos e fins)",
+          "why": "Correta, mas O(n²): com n = 10^5 são ~5·10^9 trechos. Recalcula o que o trecho anterior já sabia."
+        },
+        {
+          "name": "decidir pelo número da vez",
+          "why": "Pular ou cortar em números negativos quebra a contiguidade: em [4, -1, 2] somar 4 e 2 dá 6, mas a resposta é 5 ([4, -1, 2])."
+        },
+        {
+          "name": "programação dinâmica 1D",
+          "why": "Kadane é DP: dp[i] = nums[i] + max(dp[i−1], 0), guardado numa variável. Ainda compara duas opções a cada passo (colar ou recomeçar), por isso continua DP e não guloso."
+        }
+      ]
     }
   ],
   "models": [
@@ -424,6 +501,28 @@
       "seen": [
         {
           "n": 4,
+          "slips": 2
+        }
+      ]
+    },
+    {
+      "name": "Deciding by the current element instead of the carried state",
+      "fix": "The current element always joins; the decision is about the state you carry (sum behind >= 0 or < 0). Write both choices as expressions and cancel what appears on both sides",
+      "smell": "A condition on nums[i] when the question is about the past",
+      "seen": [
+        {
+          "n": 5,
+          "slips": 4
+        }
+      ]
+    },
+    {
+      "name": "Two similar quantities under one name",
+      "fix": "Name each running value by what it means (best ending here vs best so far) and never let one stand in for the other",
+      "smell": "'the best' used without saying best of what",
+      "seen": [
+        {
+          "n": 5,
           "slips": 2
         }
       ]
