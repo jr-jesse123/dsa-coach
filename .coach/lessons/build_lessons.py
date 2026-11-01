@@ -28,6 +28,8 @@ AUDIO = os.path.join(HERE, "audio")    # recorded narration (build_audio.py)
 OUT_AUDIO = os.path.join(COACH, "dist", "audio")
 
 sys.path.insert(0, HERE)
+import review  # noqa: E402
+STATE = os.path.join(COACH, "state.json")
 errors = []
 
 
@@ -44,15 +46,16 @@ process.stdout.write(JSON.stringify({ N, P, D, F }));
     return json.loads(out.stdout)
 
 
-def the47():
-    """LeetCode numbers (window.COACH_LC) and titles (statement headers) of the 47 problems."""
+def the47(skip=()):
+    """LeetCode numbers (window.COACH_LC) and titles (statement headers) of the 47 problems,
+    leaving out the problem numbers in `skip` (e.g. the solved ones, which the review may name)."""
     m = re.search(r"window\.COACH_LC\s*=\s*\{([^}]*)\}", open(CTPL, encoding="utf-8").read())
-    nums = {int(k) for k in re.findall(r"(\d+):\d+", m.group(1))}
+    nums = {int(lc) for lc, n in re.findall(r"(\d+):(\d+)", m.group(1)) if int(n) not in skip}
     titles = []
     pdir = os.path.join(ROOT, "TopCoding.Array", "Problems")
     for d in sorted(os.listdir(pdir)):
         md = os.path.join(pdir, d, d + ".md")
-        if os.path.exists(md):
+        if os.path.exists(md) and int(d[1:4]) not in skip:
             head = open(md, encoding="utf-8").readline()
             titles.append(re.sub(r"^#\s*\d+\.\s*", "", head).strip())
     return nums, titles
@@ -83,6 +86,20 @@ def check_spoilers(lesson, nums, titles):
     for t in titles:
         if len(norm(t)) >= 8 and norm(t) in flat:
             errors.append(f"{lesson['id']}: mentions the title \"{t}\", one of the 47")
+
+
+def names47(item, nums, titles):
+    """The first unsolved problem an item names, or None. Titles match as whole phrases,
+    so a sequel (\"Coin Change II\") is not the original (\"Coin Change\")."""
+    text = "\n".join(strings(item))
+    cited = re.findall(r"(?:LeetCode|LC)\s*#?\s*(\d+)", text) + re.findall(r"\b(\d{2,4})\s*\(", text)
+    for n in cited:
+        if int(n) in nums:
+            return f"LeetCode {n}"
+    for t in titles:
+        if re.search(r"(?<![\w])" + re.escape(t) + r"(?!\s+[IVX]+\b)(?![\w])", text, re.I):
+            return t
+    return None
 
 
 def check_refs(lesson, T):
@@ -167,8 +184,21 @@ def main():
         "P": {k: {f: T["P"][k].get(f) for f in keep} for k in sorted(pats)},
         "F": {L["leaf"]: T["F"].get(L["leaf"], []) for L in lessons},
     }
+    # Review bank: the whole tree. It may name solved problems, never the unsolved ones.
+    solved = json.load(open(STATE, encoding="utf-8")).get("solved", [])
+    items, per, errs = review.build_bank(T, lessons, solved)
+    errors.extend(errs)
+    rn, rt = the47(skip={s["n"] for s in solved})
+    dropped = [it for it in items if names47(it, rn, rt)]
+    items = [it for it in items if it not in dropped]
+    for it in dropped:
+        print(f"--  review: left out {it['id']} (names {names47(it, rn, rt)}, an unsolved problem)")
+    if errors:
+        sys.exit("review build failed:\n  " + "\n  ".join(errors))
+    rev = {"items": items, "types": review.TYPES, "tree": review.selector_tree(T)}
+
     audio = recorded(lessons)
-    payload = json.dumps({"tree": data, "lessons": lessons, "audio": audio}, ensure_ascii=False).replace("</", "<\\/")
+    payload = json.dumps({"tree": data, "lessons": lessons, "audio": audio, "review": rev}, ensure_ascii=False).replace("</", "<\\/")
     html = open(PLAYER, encoding="utf-8").read()
     if "/*__DATA__*/null" not in html:
         sys.exit("player template has no /*__DATA__*/null slot")
@@ -181,6 +211,11 @@ def main():
     for L in lessons:
         w = words[L["id"]]
         print(f"ok  {L['id']}: {len(L['scenes'])} scenes, {w} words of narration ≈ {w / 150:.1f} min at 150 wpm")
+    by_type = {}
+    for it in items:
+        by_type[it["type"]] = by_type.get(it["type"], 0) + 1
+    print(f"ok  review: {len(items)} questions · " + ", ".join(f"{k} {v}" for k, v in by_type.items())
+          + f" · per pattern {min(per.values())}–{max(per.values())}")
     print(f"ok  wrote {os.path.relpath(OUT, ROOT)} ({len(html) // 1024} KB)")
 
 

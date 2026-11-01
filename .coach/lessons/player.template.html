@@ -41,6 +41,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
 .wrap { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; display: grid; gap: 18px; }
 h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
@@ -250,6 +251,79 @@ select.tbtn { padding-right: 8px; }
 .quiz .qx { font-size: 14px; }
 .askhint { font-family: var(--f-mono); font-size: 11.5px; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
 
+/* ---------- modos ---------- */
+.modes { display: inline-flex; border: 1px solid var(--line); border-radius: 12px; padding: 3px; background: var(--surface); gap: 3px; }
+.mode { border: 0; background: transparent; border-radius: 9px; padding: 8px 16px; font-weight: 600; font-size: 14.5px; color: var(--muted); }
+.mode[aria-current="true"] { background: var(--accent); color: var(--surface); }
+.player > .tabs { margin-bottom: 4px; }
+
+/* ---------- revisão ---------- */
+.review { display: grid; gap: 14px; }
+.rv-home, .rv-end { display: grid; gap: 14px; }
+.rv-sum { display: flex; flex-wrap: wrap; gap: 8px; }
+.stat { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 12px; display: grid; min-width: 92px; }
+.stat b { font-family: var(--f-display); font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { font-size: 12px; color: var(--muted); }
+.stat.warn b { color: var(--warn); }
+.stat.bad b { color: var(--bad); }
+.rv-start { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.rv-size { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+details.rv-sel, details.rv-io { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 14px; }
+details summary { cursor: pointer; font-size: 14.5px; }
+details summary span { color: var(--muted); font-size: 13px; margin-left: 6px; }
+.rv-selbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.seg2 { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg2 button { border: 0; background: var(--surface); padding: 8px 12px; font-size: 13px; color: var(--muted); }
+.seg2 button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.rv-legend { font-size: 12px; color: var(--muted); display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0 4px; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: 0; background: var(--line); flex: none; }
+.dot.weak { background: var(--bad); } .dot.ok { background: var(--warn); } .dot.strong { background: var(--leaf); }
+.rv-tree ul { list-style: none; margin: 0; padding-left: 18px; border-left: 1px dashed var(--line); }
+.rv-tree > ul { padding-left: 0; border-left: 0; }
+.rv-tree li { margin: 2px 0; }
+.rv-tree .q { font-size: 12px; color: var(--muted); margin: 6px 0 2px 26px; }
+.rv-row { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; font-size: 14px; }
+.rv-row input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
+.rv-row label { min-width: 0; }
+.rv-row .pat { font-weight: 600; }
+.rv-row .pat .dot { margin-left: 2px; }
+.rv-row .n { font-family: var(--f-mono); font-size: 11px; color: var(--muted); margin-left: 4px; }
+.rv-tree details > summary { list-style: none; }
+.rv-tree details > summary::-webkit-details-marker { display: none; }
+.rv-tree .tw { font-family: var(--f-mono); color: var(--muted); font-size: 11px; width: 12px; display: inline-block; }
+.rv-tree details[open] > summary .tw::before { content: "▾"; } .rv-tree details:not([open]) > summary .tw::before { content: "▸"; }
+.rv-io textarea { width: 100%; margin-top: 8px; font-family: var(--f-mono); font-size: 12px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--sunk); color: var(--ink); }
+.rv-iobtns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.rv-note { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.rv-q { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: clamp(16px, 3vw, 26px); display: grid; gap: 14px; animation: rise .35s both; }
+.rv-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.rv-top .kind { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.rv-top .count { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rv-dots { display: flex; gap: 3px; }
+.rv-dots i { flex: 1; height: 5px; border-radius: 3px; background: var(--line); }
+.rv-dots i.r { background: var(--leaf); } .rv-dots i.w { background: var(--bad); } .rv-dots i.c { background: var(--accent); }
+.rv-prompt { font-family: var(--f-display); font-size: clamp(18px, 2.6vw, 22px); line-height: 1.3; white-space: pre-line; margin: 0; }
+.rv-prompt small { display: block; font-family: var(--f-body); font-size: 13.5px; color: var(--muted); margin-bottom: 4px; }
+.rv-opts { display: grid; gap: 8px; }
+.rv-opts button { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 14px; font-size: 15px; min-height: 48px; }
+.rv-opts button:not(:disabled):hover { border-color: var(--accent); }
+.rv-opts button.right { border-color: var(--leaf); background: var(--leaf-soft); }
+.rv-opts button.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.rv-opts button:disabled { cursor: default; color: var(--ink); }
+.rv-ans { border-left: 3px solid var(--leaf); background: var(--leaf-soft); padding: 10px 14px; border-radius: 0 10px 10px 0; font-size: 15px; }
+.rv-fb { display: grid; gap: 6px; font-size: 14.5px; }
+.rv-fb .verdict { font-weight: 600; }
+.rv-fb .verdict.r { color: var(--leaf); } .rv-fb .verdict.w { color: var(--bad); }
+.rv-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.rv-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.rv-grade button { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px; font-weight: 600; min-height: 48px; }
+.rv-grade button[data-g="0"] { color: var(--bad); } .rv-grade button[data-g="1"] { color: var(--warn); } .rv-grade button[data-g="2"] { color: var(--leaf); }
+.rv-end h2 { font-size: clamp(22px, 3vw, 28px); }
+.rv-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.rv-list li { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 12px; font-size: 14px; display: flex; gap: 8px; align-items: baseline; }
+.rv-list li b { font-weight: 600; }
+.rv-list li span { color: var(--muted); font-size: 12.5px; }
+
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes grow { from { transform: scaleX(0); } to { transform: none; } }
 @keyframes bump { 40% { transform: scale(1.12); border-color: var(--accent); } }
@@ -259,14 +333,18 @@ select.tbtn { padding-right: 8px; }
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow">Árvore de Padrões · aulas</div>
+      <div class="eyebrow">Árvore de Padrões</div>
       <h1 id="ltitle">Aulas de Padrões</h1>
       <p id="lkicker"></p>
     </div>
-    <nav class="tabs" id="tabs" aria-label="Aulas"></nav>
+    <nav class="modes" aria-label="Modo">
+      <button type="button" class="mode" data-mode="aulas" aria-current="true">Aulas</button>
+      <button type="button" class="mode" data-mode="revisao" aria-current="false">Revisão</button>
+    </nav>
   </header>
 
-  <main class="player">
+  <main class="player" id="aulas">
+    <nav class="tabs" id="tabs" aria-label="Aulas"></nav>
     <div class="stage-head">
       <h2 id="stitle"></h2>
       <span class="where" id="where"></span>
@@ -288,6 +366,40 @@ select.tbtn { padding-right: 8px; }
     </div>
     <p class="voicenote" id="voicenote"></p>
     <ol class="chapters" id="chapters"></ol>
+  </main>
+
+  <main class="review" id="revisao" hidden>
+    <section class="rv-home" id="rvHome">
+      <div class="rv-sum" id="rvSum"></div>
+      <div class="rv-start">
+        <label class="rv-size" for="rvSize">Perguntas
+          <select class="tbtn" id="rvSize"><option value="5">5</option><option value="10">10</option><option value="20">20</option></select>
+        </label>
+        <button type="button" class="tbtn play" id="rvGo">Começar</button>
+      </div>
+      <details class="rv-sel" open>
+        <summary><b>O que entra na revisão</b> <span id="rvSelCount"></span></summary>
+        <div class="rv-selbar">
+          <div class="seg2" role="group" aria-label="Leitura da árvore">
+            <button type="button" data-root="root" aria-pressed="true">Pela forma do input</button>
+            <button type="button" data-root="nroot" aria-pressed="false">Pelo que a solução precisa fazer</button>
+          </div>
+          <button type="button" class="tbtn" id="rvAll">Tudo</button>
+          <button type="button" class="tbtn" id="rvNone">Nada</button>
+        </div>
+        <p class="rv-legend"><i class="dot new"></i>nova <i class="dot weak"></i>fraca <i class="dot ok"></i>ok <i class="dot strong"></i>forte</p>
+        <div class="rv-tree" id="rvTree"></div>
+      </details>
+      <details class="rv-io">
+        <summary>Backup do progresso</summary>
+        <p class="rv-note">O progresso fica neste aparelho. Copie o texto abaixo para guardar ou para levar a outro aparelho, e cole lá em Importar.</p>
+        <textarea id="rvIO" rows="4" spellcheck="false" aria-label="Progresso em JSON"></textarea>
+        <div class="rv-iobtns"><button type="button" class="tbtn" id="rvExport">Copiar progresso</button><button type="button" class="tbtn" id="rvImport">Importar o texto colado</button></div>
+        <p class="rv-note" id="rvIOmsg" role="status"></p>
+      </details>
+    </section>
+    <section class="rv-q" id="rvQ" hidden></section>
+    <section class="rv-end" id="rvEnd" hidden></section>
   </main>
 </div>
 
@@ -757,18 +869,277 @@ $("#speed").onchange = e => { prefs.speed = +e.target.value; store.set("prefs", 
 $("#voice").onclick = () => { prefs.voice = !prefs.voice; store.set("prefs", prefs); voiceNote(); if (playing) runStep(); };
 $("#cc").onclick = () => { const on = $("#cc").getAttribute("aria-pressed") !== "true"; prefs.cc = on; store.set("prefs", prefs); syncCC(); };
 document.addEventListener("keydown", e => {
-  if (e.target.closest("select")) return;
+  if (MODE !== "aulas" || e.target.closest("select, textarea, input")) return;
   if (e.key === " " && !e.target.closest("button")) { e.preventDefault(); $("#play").click(); }
   else if (e.key === "ArrowRight") stepBy(1);
   else if (e.key === "ArrowLeft") stepBy(-1);
 });
 window.addEventListener("hashchange", () => {
+  if (location.hash === "#revisao") { if (MODE !== "revisao") setMode("revisao"); return; }
   const i = LESSONS.findIndex(L => "#" + L.id === location.hash);
-  if (i >= 0 && i !== LI) openLesson(i, 0, false);
+  if (i >= 0 && (i !== LI || MODE !== "aulas")) { setMode("aulas"); openLesson(i, 0, false); }
 });
 
-/* início: aula do hash, ou a última aberta */
+/* =================== Revisão: perguntas sorteadas por peso =================== */
+const RV = DATA.review, ITEMS = RV.items, RT = RV.tree;
+const DAY = 864e5, IV = [1, 3, 7, 16, 35], MAX_NEW = 4;
+const FRONT = new Set(["verd", "flip", "cx"]);
+const PATS = Object.keys(RT.names);
+
+/* ponto de troca para o banco compartilhado (etapa 2): só load() e save() tocam o armazenamento */
+const progress = {
+  blank: () => ({ v: 1, items: {}, conf: {}, sel: null, size: 10, root: "root" }),
+  load() { const d = store.get("review", null); return d && d.v === 1 ? Object.assign(this.blank(), d) : this.blank(); },
+  save(d) { store.set("review", d); },
+};
+let RS = progress.load();
+const save = () => progress.save(RS);
+const selected = () => new Set(RS.sel || PATS);
+
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const confKey = (a, b) => [a, b].sort().join("|");
+function confusion(a, b, now) {
+  const c = RS.conf[confKey(a, b)];
+  return c ? c.n * Math.pow(0.5, (now - c.t) / (7 * DAY)) : 0;
+}
+function weight(it, now) {
+  const s = RS.items[it.id];
+  if (!s) return 1.5;
+  const iv = IV[Math.min(s.streak, IV.length - 1)] * DAY;
+  let w = clamp((now - s.last) / iv, 0.1, 4);
+  if (s.wrong) w *= 1 + 2 * Math.exp(-(now - s.wrong) / (2 * DAY));
+  if (FRONT.has(it.type) && it.pats.length === 2) w *= 1 + confusion(it.pats[0], it.pats[1], now);
+  return w;
+}
+const eligible = (it, sel) => it.type === "node" ? it.pats.some(p => sel.has(p)) : sel.has(it.pats[0]);
+function buildSession(n, now = Date.now(), rand = Math.random) {
+  const sel = selected();
+  const pool = ITEMS.filter(it => eligible(it, sel)).map(it => ({ it, w: weight(it, now), fresh: !RS.items[it.id] }));
+  const out = [], used = new Set();
+  let fresh = 0;
+  const overlap = (a, b) => a.pats.some(p => b.pats.includes(p));
+  while (out.length < n) {
+    const prev = out[out.length - 1];
+    const free = c => !used.has(c.it.id);
+    const cap = c => !c.fresh || fresh < MAX_NEW;
+    const apart = c => !(prev && overlap(c.it, prev));
+    // regras em ordem de importância: relaxa o limite de novas antes de repetir padrão seguido
+    let cands = [];
+    for (const rule of [c => cap(c) && apart(c), c => apart(c), c => true]) {
+      cands = pool.filter(c => free(c) && rule(c));
+      if (cands.length) break;
+    }
+    if (!cands.length) break;
+    let x = rand() * cands.reduce((a, c) => a + c.w, 0), pick = cands[cands.length - 1];
+    for (const c of cands) { x -= c.w; if (x <= 0) { pick = c; break; } }
+    used.add(pick.it.id); if (pick.fresh) fresh++;
+    out.push(pick.it);
+  }
+  return out;
+}
+/* grade: 0 errei, 1 quase, 2 acertei; chosenKey = padrão escolhido numa pergunta de padrão */
+function grade(it, g, now = Date.now(), chosenKey = null) {
+  const s = RS.items[it.id] || { last: 0, streak: 0, lapses: 0, wrong: 0 };
+  s.last = now;
+  if (g === 2) s.streak++;
+  else if (g === 0) { s.streak = 0; s.lapses++; s.wrong = now; }
+  RS.items[it.id] = s;
+  if (g === 0 && chosenKey && chosenKey !== it.pats[0]) {
+    const k = confKey(it.pats[0], chosenKey);
+    RS.conf[k] = { n: confusion(it.pats[0], chosenKey, now) + 1, t: now };
+  }
+  save();
+}
+function mastery(p) {
+  const its = ITEMS.filter(it => it.pats[0] === p || (it.type !== "node" && it.pats.includes(p)));
+  const seen = its.map(it => RS.items[it.id]).filter(Boolean);
+  if (!seen.length) return "new";
+  const now = Date.now();
+  const score = seen.reduce((a, s) => a + Math.min(s.streak, 4) / 4 - (s.wrong && now - s.wrong < 3 * DAY ? 0.5 : 0), 0) / seen.length;
+  return score < 0.3 ? "weak" : score < 0.65 ? "ok" : "strong";
+}
+const isDue = (it, now) => { const s = RS.items[it.id]; return s && now - s.last >= IV[Math.min(s.streak, IV.length - 1)] * DAY; };
+
+/* ---------- tela inicial ---------- */
+function drawHome() {
+  const now = Date.now(), sel = selected();
+  const pool = ITEMS.filter(it => eligible(it, sel));
+  const due = pool.filter(it => isDue(it, now)).length;
+  const fresh = pool.filter(it => !RS.items[it.id]).length;
+  const weak = pool.filter(it => { const s = RS.items[it.id]; return s && s.wrong && now - s.wrong < 3 * DAY; }).length;
+  const pairs = Object.entries(RS.conf).map(([k, c]) => [k, c.n * Math.pow(0.5, (now - c.t) / (7 * DAY))]).filter(x => x[1] >= 0.5).length;
+  $("#rvSum").innerHTML = [[pool.length, "perguntas no filtro", ""], [due, "vencidas", due ? "warn" : ""], [fresh, "nunca vistas", ""],
+    [weak, "erradas há pouco", weak ? "bad" : ""], [pairs, "pares de confusão", pairs ? "bad" : ""]]
+    .map(([n, l, c]) => `<div class="stat ${c}"><b>${n}</b><span>${l}</span></div>`).join("");
+  $("#rvSize").value = String(RS.size);
+  $("#rvGo").disabled = !pool.length;
+  document.querySelectorAll(".seg2 button").forEach(b => b.setAttribute("aria-pressed", b.dataset.root === RS.root));
+  drawSelector();
+}
+function below(go, seen = new Set()) {
+  if (go.startsWith("p:")) return [go.slice(2)];
+  if (seen.has(go)) return [];
+  seen.add(go);
+  return [...new Set(RT.N[go].opts.flatMap(o => below(o.go, new Set(seen))))];
+}
+function drawSelector() {
+  const sel = selected(), counts = {};
+  ITEMS.forEach(it => { if (it.type !== "node") counts[it.pats[0]] = (counts[it.pats[0]] || 0) + 1; });
+  const openSet = drawSelector.open || (drawSelector.open = new Set());
+  let uid = 0;
+  const box = (pats, label, path) => {
+    const on = pats.filter(p => sel.has(p)).length;
+    const id = "rvc" + (uid++);
+    return `<input type="checkbox" id="${id}" data-pats="${pats.join(",")}" ${on === pats.length ? "checked" : ""} data-mixed="${on > 0 && on < pats.length}"><label for="${id}">${label}</label>`;
+  };
+  const node = (nid, path) => `<div class="q">${esc(RT.N[nid].q)}</div><ul>${RT.N[nid].opts.map((o, i) => {
+    const pats = below(o.go), p = path + "/" + i;
+    if (o.go.startsWith("p:")) {
+      const k = o.go.slice(2);
+      return `<li><div class="rv-row">${box(pats, `${esc(o.t)} → <span class="pat">${esc(RT.names[k])} <i class="dot ${mastery(k)}"></i></span><span class="n">${counts[k] || 0}</span>`)}</div></li>`;
+    }
+    return `<li><details data-p="${p}" ${openSet.has(p) ? "open" : ""}><summary><div class="rv-row"><span class="tw"></span>${box(pats, `${esc(o.t)} <span class="n">${pats.length} padrões</span>`)}</div></summary>${node(o.go, p)}</details></li>`;
+  }).join("")}</ul>`;
+  const tree = $("#rvTree");
+  tree.innerHTML = node(RS.root, RS.root);
+  tree.querySelectorAll('input[data-mixed="true"]').forEach(c => c.indeterminate = true);
+  tree.querySelectorAll("input").forEach(c => c.onchange = () => {
+    const pats = c.dataset.pats.split(","), s = selected();
+    const all = pats.every(p => s.has(p));
+    pats.forEach(p => all ? s.delete(p) : s.add(p));
+    RS.sel = s.size === PATS.length ? null : [...s];
+    save(); drawHome();
+  });
+  tree.querySelectorAll("summary input, summary label").forEach(el => el.addEventListener("click", e => e.stopPropagation()));
+  tree.querySelectorAll("details").forEach(d => d.ontoggle = () => d.open ? openSet.add(d.dataset.p) : openSet.delete(d.dataset.p));
+  $("#rvSelCount").textContent = `${sel.size} de ${PATS.length} padrões`;
+}
+
+/* ---------- sessão ---------- */
+let SESSION = null;
+function startSession() {
+  const list = buildSession(RS.size);
+  if (!list.length) return;
+  SESSION = { list, i: 0, res: [], chosen: [] };
+  $("#rvHome").hidden = true; $("#rvEnd").hidden = true; $("#rvQ").hidden = false;
+  drawQ();
+}
+function drawQ() {
+  const S = SESSION, it = S.list[S.i];
+  const dots = S.list.map((_, j) => `<i class="${j < S.res.length ? (S.res[j] === 2 ? "r" : S.res[j] === 0 ? "w" : "c") : j === S.i ? "c" : ""}"></i>`).join("");
+  const [ctx, ...rest] = it.prompt.split("\n");
+  const prompt = rest.length ? `<small>${esc(ctx)}</small>${esc(rest.join("\n"))}` : esc(it.prompt);
+  $("#rvQ").innerHTML = `<div class="rv-top"><span class="kind">${esc(RV.types[it.type])}</span><span class="count">${S.i + 1} de ${S.list.length}</span></div>
+    <div class="rv-dots">${dots}</div>
+    <p class="rv-prompt">${prompt}</p>
+    ${it.code ? `<div class="codebox"><pre class="code">${it.code.split("\n").map((ln, i) => `<span class="ln" data-n="${i + 1}">${hl(ln) || " "}</span>`).join("")}</pre></div>` : ""}
+    ${it.opts ? `<div class="rv-opts">${it.opts.map((o, i) => `<button type="button" data-i="${i}">${esc(o)}</button>`).join("")}</div>`
+      : `<div class="rv-acts"><button type="button" class="tbtn play" id="rvReveal">Revelar</button></div>`}
+    <div class="rv-fb" id="rvFb"></div>`;
+  if (it.opts) $("#rvQ").querySelectorAll(".rv-opts button").forEach(b => b.onclick = () => answerMC(+b.dataset.i));
+  else $("#rvReveal").onclick = reveal;
+  $("#rvQ").scrollIntoView({ block: "start", behavior: "smooth" });
+}
+function feedback(html) {
+  const it = SESSION.list[SESSION.i], L = it.lesson && LESSONS.findIndex(x => x.id === it.lesson.id);
+  const last = SESSION.i + 1 >= SESSION.list.length;
+  $("#rvFb").innerHTML = html + `<div class="rv-acts">
+    <button type="button" class="tbtn play" id="rvNext">${last ? "Ver resultado" : "Próxima"}</button>
+    ${it.lesson && L >= 0 ? `<button type="button" class="tbtn" id="rvLesson">Rever na aula</button>` : ""}</div>`;
+  $("#rvNext").onclick = nextQ;
+  $("#rvNext").focus({ preventScroll: true });
+  const lb = $("#rvLesson");
+  if (lb) lb.onclick = () => { setMode("aulas"); openLesson(L, it.lesson.scene, false); };
+}
+function answerMC(i) {
+  const S = SESSION, it = S.list[S.i];
+  const bs = [...$("#rvQ").querySelectorAll(".rv-opts button")];
+  bs.forEach(b => b.disabled = true);
+  bs[it.correct].classList.add("right");
+  const ok = i === it.correct;
+  if (!ok) bs[i].classList.add("wrong");
+  const g = ok ? 2 : 0;
+  grade(it, g, Date.now(), it.okeys ? it.okeys[i] : null);
+  S.res.push(g); S.chosen.push(it.okeys && !ok ? it.okeys[i] : null);
+  feedback(`<span class="verdict ${ok ? "r" : "w"}">${ok ? "Certo." : "Não foi dessa vez."}</span>${it.explain ? `<p>${esc(it.explain)}</p>` : ""}`);
+}
+function reveal() {
+  const it = SESSION.list[SESSION.i];
+  $("#rvQ").querySelector(".rv-acts").outerHTML = `<div class="rv-ans">${esc(it.answer)}</div>${it.explain ? `<p class="rv-note">${esc(it.explain)}</p>` : ""}
+    <p class="rv-note">Como foi?</p><div class="rv-grade"><button type="button" data-g="0">Errei</button><button type="button" data-g="1">Quase</button><button type="button" data-g="2">Acertei</button></div>`;
+  $("#rvQ").querySelectorAll(".rv-grade button").forEach(b => b.onclick = () => {
+    const g = +b.dataset.g;
+    $("#rvQ").querySelectorAll(".rv-grade button").forEach(x => x.disabled = true);
+    b.classList.add("right");
+    grade(it, g); SESSION.res.push(g); SESSION.chosen.push(null);
+    feedback("");
+  });
+}
+function nextQ() {
+  SESSION.i++;
+  if (SESSION.i < SESSION.list.length) drawQ(); else drawEnd();
+}
+function drawEnd() {
+  const S = SESSION, n = S.list.length, right = S.res.filter(g => g === 2).length;
+  const missed = S.list.filter((_, j) => S.res[j] === 0);
+  const now = Date.now();
+  const pairs = Object.entries(RS.conf).map(([k, c]) => [k, c.n * Math.pow(0.5, (now - c.t) / (7 * DAY))]).filter(x => x[1] >= 0.5).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  $("#rvQ").hidden = true; $("#rvEnd").hidden = false;
+  $("#rvEnd").innerHTML = `<h2>${right} de ${n} certas</h2>
+    ${missed.length ? `<div class="eyebrow">Para voltar logo (o sorteio vai trazê-las de novo)</div><ul class="rv-list">${missed.map(it => `<li><b>${esc(RT.names[it.pats[0]])}</b><span>${esc(RV.types[it.type])}</span></li>`).join("")}</ul>` : `<p>Nenhum erro nesta sessão.</p>`}
+    ${pairs.length ? `<div class="eyebrow">Pares que você mais confunde</div><ul class="rv-list">${pairs.map(([k]) => `<li><b>${k.split("|").map(p => esc(RT.names[p])).join(" × ")}</b></li>`).join("")}</ul>` : ""}
+    <div class="rv-acts"><button type="button" class="tbtn play" id="rvAgain">Mais uma sessão</button><button type="button" class="tbtn" id="rvBack">Voltar</button></div>`;
+  $("#rvAgain").onclick = startSession;
+  $("#rvBack").onclick = showHome;
+}
+function showHome() { SESSION = null; $("#rvQ").hidden = true; $("#rvEnd").hidden = true; $("#rvHome").hidden = false; drawHome(); }
+
+$("#rvGo").onclick = startSession;
+$("#rvSize").onchange = e => { RS.size = +e.target.value; save(); };
+$("#rvAll").onclick = () => { RS.sel = null; save(); drawHome(); };
+$("#rvNone").onclick = () => { RS.sel = []; save(); drawHome(); };
+document.querySelectorAll(".seg2 button").forEach(b => b.onclick = () => { RS.root = b.dataset.root; save(); drawHome(); });
+$("#rvExport").onclick = () => {
+  const t = JSON.stringify(RS);
+  $("#rvIO").value = t;
+  const done = m => $("#rvIOmsg").textContent = m;
+  try { navigator.clipboard.writeText(t).then(() => done("Copiado."), () => { $("#rvIO").select(); done("Selecionado: copie com o menu do aparelho."); }); }
+  catch { $("#rvIO").select(); done("Selecionado: copie com o menu do aparelho."); }
+};
+$("#rvImport").onclick = () => {
+  try {
+    const d = JSON.parse($("#rvIO").value);
+    if (!d || d.v !== 1 || typeof d.items !== "object") throw new Error();
+    RS = Object.assign(progress.blank(), d); save(); drawHome();
+    $("#rvIOmsg").textContent = `Importado: ${Object.keys(RS.items).length} perguntas com histórico.`;
+  } catch { $("#rvIOmsg").textContent = "Esse texto não é um progresso válido. Cole o texto inteiro copiado em outro aparelho."; }
+};
+
+/* ---------- modos ---------- */
+let MODE = "aulas";
+function setMode(m) {
+  MODE = m;
+  document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-current", b.dataset.mode === m));
+  $("#aulas").hidden = m !== "aulas"; $("#revisao").hidden = m !== "revisao";
+  if (m === "revisao") {
+    setPlaying(false);
+    document.title = "Revisão · Aulas de Padrões";
+    $("#ltitle").textContent = "Revisão";
+    $("#lkicker").textContent = "Perguntas sorteadas da árvore inteira. As que você não vê há tempo, ou errou há pouco, aparecem mais.";
+    try { if (location.hash !== "#revisao") history.replaceState(null, "", "#revisao"); } catch {}
+    if (!SESSION) showHome();
+  } else {
+    const L = lesson();
+    document.title = `${L.title} · Aulas de Padrões`;
+    $("#ltitle").textContent = L.title; $("#lkicker").textContent = L.kicker;
+    try { if (location.hash !== "#" + L.id) history.replaceState(null, "", "#" + L.id); } catch {}
+  }
+}
+document.querySelectorAll(".mode").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+/* início: revisão, aula do hash, ou a última aberta */
 (function start() {
+  const wantReview = location.hash === "#revisao";
   const pos = store.get("pos", null);
   let li = LESSONS.findIndex(L => "#" + L.id === location.hash), si = 0;
   if (li < 0 && pos) { li = LESSONS.findIndex(L => L.id === pos.l); si = pos.s || 0; }
@@ -776,5 +1147,6 @@ window.addEventListener("hashchange", () => {
   if (si >= LESSONS[li].scenes.length) si = 0;
   if (speech.ok) { speechSynthesis.onvoiceschanged = pickVoice; pickVoice(); } else voiceNote();
   openLesson(li, si, false);
+  if (wantReview) setMode("revisao");
 })();
 </script>

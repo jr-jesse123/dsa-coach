@@ -87,5 +87,5 @@ dotnet test TopCoding.Array --filter "FullyQualifiedName~P003_"   # testes de um
 
 - `TopCoding.Array/Problems/PNNN_Nome/`: `Solution.cs` (seu código), testes e enunciado (`.md`).
 - `.coach/`: servidor, template, fonte da árvore, scripts de build e de verificação, `state.json` e `thread.jsonl` (histórico do chat).
-- `.coach/lessons/`: aulas animadas e narradas sobre a árvore (player + uma aula por padrão). Publicadas em https://claude.ai/artifact/H1etDc2Mr3MLp6RZkHGk36.
+- `.coach/lessons/`: aulas animadas e narradas sobre a árvore (player + uma aula por padrão) e a aba Revisão (perguntas da árvore inteira, sorteadas por peso: vencidas e erradas recentemente aparecem mais). Publicadas em https://claude.ai/artifact/H1etDc2Mr3MLp6RZkHGk36.
 - `.claude/skills/dsa-coach/SKILL.md`: as regras da sessão de coaching.
