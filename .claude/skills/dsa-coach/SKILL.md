@@ -115,6 +115,10 @@ Rules for the chat:
    - Name the edge cases the constraints allow (smallest input, zeros, extremes) and what the answer is there.
    - Correct misreadings of the statement plainly: the statement is not a hint. Never use `TestData/` for examples.
    - Move to `phase: recognize` only when they can state the problem and solve a small case by hand.
+   - **Two modes, the user's choice per problem.** *Guided* (default) walks the tree before coding (step 3). *Solve first* is opt-in: when the user already sees a solution, skip step 3 and go to `phase: code` after Entender.
+     - In *solve first*, comment on saves as usual (step 4), but give no pattern hints.
+     - It is only worth it while they make progress. Switch back to *guided* when they say they are lost or give up. Offer the switch yourself when saves lose direction or a slip reaches the "stop the code" rung below.
+     - After the tests are green, walk both readings of the tree before step 6. Check whether they reach the tool the user picked. If not, compare the two with their Fronteiras, and record the wrong pick in `models` as a recognition model.
 3. **Reconhecer.** Walk the tree with questions, never with answers:
    - Start with the constraints ruler: what complexity does n allow?
    - Then go through input shape → what is asked → the restriction (the "Pela forma do input" reading).
@@ -132,6 +136,7 @@ Rules for the chat:
    - **Track the model behind each slip.** For every wrong save, note privately which mental model it comes from, not just the code error. Different code errors often share one model (e.g. `weight >= n`, `idx == n - 1` and a misplaced `+ 1` are all "mixing two index frames").
    - When a slip repeats a model already seen (in this problem, or in `models` from earlier ones), say so in the chat: name the model, not only the line ("same frame mix as before: …"). Ask the question that targets the model, not just the patch.
    - Two or more saves that only tweak a constant or an offset back and forth mean they are tuning, not reasoning: stop the code and ask for the rule in one sentence.
+   - **Escalate as a model repeats.** The first slip of a model gets a question with a tiny trace. A repeat names the model and where it showed up before. A further repeat stops the code: ask for the rule in words, then give a more explicit scaffold (fill in the blank, or both choices written side by side as expressions).
 5. **Done.** The only signal is that all tests of that problem are green. Check tests only when the file compiles:
    - Run `dotnet test TopCoding.Array --artifacts-path <scratchpad>/build --filter "FullyQualifiedName~PNNN_"`.
    - The separate artifacts path avoids file locks from Visual Studio.
