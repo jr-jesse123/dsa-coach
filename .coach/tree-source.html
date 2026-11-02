@@ -63,6 +63,13 @@ header p.legend { font-size: 13.5px; padding: 10px 14px; border: 1px dashed var(
 .derive { display: grid; gap: 6px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 13.5px; }
 .derive p { margin: 0; }
 .derive code { font-family: var(--f-mono); font-size: 12.5px; color: var(--accent); }
+.shrink { display: grid; gap: 14px; }
+.shrink-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.shrink table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 13.5px; }
+.shrink th, .shrink td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+.shrink th { font-family: var(--f-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.shrink tr:last-child td { border-bottom: 0; }
+.shrink .chips { gap: 4px; }
 @media (max-width: 900px) {
   .ruler { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .tick:nth-child(5) { border-left: 0; }
@@ -236,6 +243,26 @@ header p.legend { font-size: 13.5px; padding: 10px 14px; border: 1px dashed var(
     <div class="derive">
       <p><b>Como derivar a tabela:</b> o orçamento é ~10⁸. Resolva <code>f(n) = 10⁸</code> para o n máximo. Em <code>n²</code>, <code>n = √10⁸ = 10⁴</code>. Em <code>n³</code>, <code>n = ∛10⁸ ≈ 500</code>. Em <code>n log n</code>, <code>log₂ n ≈ 22</code>, então <code>n ≈ 10⁸ / 22 ≈ 5·10⁶</code>.</p>
       <p><b>Exemplo de uso:</b> com <code>n = 10⁵</code>, <code>n² = 10¹⁰</code> estoura o orçamento e <code>n log n ≈ 1,7·10⁶</code> cabe. Sobram <code>O(n log n)</code> e <code>O(n)</code>.</p>
+    </div>
+  </section>
+
+  <section class="shrink" aria-labelledby="sshrink">
+    <div class="step0-head">
+      <h2 id="sshrink">Perguntas que encolhem o problema</h2>
+      <span>Faça antes de escolher o padrão: cada uma troca um trabalho caro por um barato</span>
+    </div>
+    <div class="shrink-wrap">
+      <table>
+        <thead><tr><th>pergunta</th><th>o que ela troca</th><th>exemplo pequeno</th><th>padrões que abre</th></tr></thead>
+        <tbody>
+        <tr><td>Que <b>ordem</b> dos itens torna a pergunta local?</td><td>comparar todos com todos → comparar com o vizinho</td><td>Menor diferença entre dois números: ordene, e só vizinhos podem ganhar.</td><td><div class="chips"><button type="button" class="leafchip" data-leaf="merge">Ordenar por início + varrer</button><button type="button" class="leafchip" data-leaf="twoptr">Dois ponteiros</button><button type="button" class="leafchip" data-leaf="byend">Greedy por fim</button><button type="button" class="leafchip" data-leaf="binsearch">Binary search</button></div></td></tr>
+        <tr><td>Qual é o <b>menor resumo do passado</b> que basta?</td><td>guardar tudo → um número</td><td>Maior lucro comprando antes de vender: guarde só o menor preço visto.</td><td><div class="chips"><button type="button" class="leafchip" data-leaf="kadane">Kadane</button><button type="button" class="leafchip" data-leaf="greedy">Greedy</button></div></td></tr>
+        <tr><td>E se eu <b>fixar onde a resposta termina</b>?</td><td>todos os trechos → um por posição</td><td>Maior sequência de 1s: a que termina aqui é a anterior + 1, ou 0.</td><td><div class="chips"><button type="button" class="leafchip" data-leaf="kadane">Kadane</button><button type="button" class="leafchip" data-leaf="dp1">DP 1D</button></div></td></tr>
+        <tr><td>O que eu <b>recalculo</b>? Dá para lembrar?</td><td>refazer a conta → consultar</td><td>Soma de muitos trechos [i..j]: guarde os prefixos, e cada soma vira P[j+1] − P[i].</td><td><div class="chips"><button type="button" class="leafchip" data-leaf="hash">Hash map / set</button><button type="button" class="leafchip" data-leaf="prefix">Prefix sum</button><button type="button" class="leafchip" data-leaf="complement">Hash do complemento</button><button type="button" class="leafchip" data-leaf="dp1">DP 1D</button></div></td></tr>
+        <tr><td>Uma comparação <b>descarta</b> quantos candidatos?</td><td>testar todos → cortar metade ou uma fileira</td><td>Par com soma alvo num array ordenado: cada comparação descarta uma ponta inteira.</td><td><div class="chips"><button type="button" class="leafchip" data-leaf="binsearch">Binary search</button><button type="button" class="leafchip" data-leaf="twoptr">Dois ponteiros</button><button type="button" class="leafchip" data-leaf="window">Sliding window</button></div></td></tr>
+        <tr><td>Sei <b>testar</b> um X, mas não calculá-lo?</td><td>procurar a resposta → testar candidatos em ordem</td><td>Menor velocidade que termina em H horas: testar uma velocidade é fácil, e a resposta é monotônica.</td><td><div class="chips"><button type="button" class="leafchip" data-leaf="bsanswer">Binary search na resposta</button></div></td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
