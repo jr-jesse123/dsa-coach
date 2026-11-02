@@ -1,18 +1,8 @@
 {
-  "phase": "justify",
-  "problem": 7,
-  "path": [
-    {
-      "q": "Qual é a forma principal do input?",
-      "a": "Lista de intervalos [início, fim]"
-    },
-    {
-      "q": "O que fazer com os intervalos?",
-      "a": "Mesclar, inserir, intersectar",
-      "leaf": "merge"
-    }
-  ],
-  "question": "Which of the four P007 models feels least clear?",
+  "phase": "pick",
+  "problem": null,
+  "path": [],
+  "question": null,
   "feedback": [
     {
       "verdict": "Good start, still a skeleton",
@@ -577,6 +567,30 @@
         {
           "name": "força bruta (tentar todos os saltos)",
           "why": "Exponencial: explora o mesmo índice várias vezes, e o que se alcança a partir dele não depende de como se chegou."
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "title": "Merge Intervals",
+      "leaf": "merge",
+      "works": "Ordenando por início, todo intervalo que ainda vai chegar começa depois de qualquer bloco já fechado, então só o último bloco da saída pode crescer. Para cada intervalo: se começa antes ou exatamente no fim do último bloco, estende o fim com Math.Max (pode estar contido); senão, abre um bloco novo. O(n log n) pela ordenação, O(n) para a saída.",
+      "nb": [
+        {
+          "name": "marcar a cobertura numa linha de números",
+          "why": "Também pode funcionar com valores até 10^4, mas a unidade vira o número, não o intervalo: intervalos de um ponto como [5, 5] não marcam nenhum trecho e somem, e a estrutura tem o tamanho do maior valor. Só compensa com faixa de valores pequena e muitos intervalos."
+        },
+        {
+          "name": "grafo de sobreposição (componentes)",
+          "why": "Também acerta: cada grupo conectado vira um intervalo. Mas as arestas não vêm no input; calculá-las compara todos os pares, O(n²)."
+        },
+        {
+          "name": "ordenar por fim",
+          "why": "Quebra o invariante: um intervalo que começa antes pode chegar depois. Em [[2, 3], [1, 10]] dá [[2, 10]] em vez de [[1, 10]]. Ordenar por fim é a troca no problema de máximo de intervalos sem sobreposição."
+        },
+        {
+          "name": "comparar só vizinhos da entrada sem ordenar",
+          "why": "A ordem de chegada não diz quem toca quem: em [[5, 8], [1, 3], [2, 6]] o [5, 8] e o [1, 3] ficam separados por engano."
         }
       ]
     }
